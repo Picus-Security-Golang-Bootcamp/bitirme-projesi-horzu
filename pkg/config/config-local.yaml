@@ -1,0 +1,26 @@
+ServerConfig:
+  AppVersion: 1.0.0
+  Mode: Development
+  RouterPrefix: /api/v1/cart-api
+  Debug: false
+  Port: 8080
+  TimeoutSecs: 60
+  ReadTimeoutSecs: 60
+  WriteTimeoutSecs: 12
+
+JWTConfig:
+  SessionTime: 3600
+  SecretKey: dummySecretKey
+
+DBConfig:
+  DataSourceName: postgres://postgres:123456Mert@localhost:5432/cart?sslmode=disabled
+  # Name: cart
+  MaxOpen: 50
+  MaxIdle: 50
+  MaxLifeTime: 5
+  # MigrationFolder: file://migrations
+
+Logger: 
+  Development: true
+  Encoding: json
+  Level: Info
