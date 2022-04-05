@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/horzu/golang/cart-api/pkg/config"
+	logger "github.com/horzu/golang/cart-api/pkg/logging"
 )
 
 func main() {
@@ -16,5 +16,7 @@ func main() {
 		log.Fatalf("loadconfig failed: %v", err)
 	}
 
-	fmt.Println(cfg)
+	// Set gloabal logger
+	logger.NewLogger(cfg)
+	defer logger.Close()
 }
