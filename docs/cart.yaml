@@ -138,6 +138,9 @@ definitions:
       discount:
         type: "integer"
         format: "int64"
+      created_at:
+        type: "string"
+        format: "date"
       order_cart:
         type: "array"
         items:
@@ -217,5 +220,3 @@ definitions:
       details:
         description: a (key, value) map.
         type: object
-
-# swagger generate model -f docs/cart.yaml -m internal/api

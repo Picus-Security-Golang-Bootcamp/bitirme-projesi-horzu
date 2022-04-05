@@ -8,9 +8,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/horzu/golang/cart-api/internal/order"
-	"github.com/horzu/golang/cart-api/internal/product"
 	"github.com/horzu/golang/cart-api/pkg/config"
 	db "github.com/horzu/golang/cart-api/pkg/database"
+	"github.com/horzu/golang/cart-api/pkg/graceful"
 	logger "github.com/horzu/golang/cart-api/pkg/logging"
 )
 
@@ -32,7 +32,7 @@ func main() {
 	r:= gin.Default()
 
 	srv := &http.Server{
-		Addr: fmt.Sprintf(":%s", cfg.ServerConfig.Port),
+		Addr: fmt.Sprintf(":%d", cfg.ServerConfig.Port),
 		Handler: r,
 		ReadTimeout: time.Duration(cfg.ServerConfig.ReadTimeoutSecs * int(time.Second)),
 		WriteTimeout: time.Duration(cfg.ServerConfig.WriteTimeoutSecs * int(time.Second)),
@@ -41,7 +41,7 @@ func main() {
 	rootRouter := r.Group(cfg.ServerConfig.RouterPrefix)
 
 	orderRouter := rootRouter.Group("/orders")
-	productRouter := rootRouter.Group("/products")
+	// productRouter := rootRouter.Group("/products")
 
 
 	// Order Repository
@@ -51,8 +51,17 @@ func main() {
 
 	
 	// Product Repository
-	productRepo := product.NewProductRepository(DB)
-	productRepo.Migration()
+	// productRepo := product.NewProductRepository(DB)
+	// productRepo.Migration()
 	// product.NewProductHandler(productRouter, productRepo)
 
+	go func(){
+		if err:= srv.ListenAndServe(); err!=http.ErrServerClosed{
+			log.Fatalf("listen error: %v", err)
+		}
+	}()
+
+	log.Println("Shopping Cart service started!")
+
+	graceful.ShutdownGin(srv, time.Duration(cfg.ServerConfig.TimeoutSecs*int(time.Second)))
 }

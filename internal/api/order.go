@@ -20,6 +20,10 @@ import (
 // swagger:model Order
 type Order struct {
 
+	// created at
+	// Format: date
+	CreatedAt strfmt.Date `json:"created_at,omitempty"`
+
 	// discount
 	// Required: true
 	Discount *int64 `json:"discount"`
@@ -36,6 +40,10 @@ type Order struct {
 func (m *Order) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateCreatedAt(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateDiscount(formats); err != nil {
 		res = append(res, err)
 	}
@@ -47,6 +55,18 @@ func (m *Order) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *Order) validateCreatedAt(formats strfmt.Registry) error {
+	if swag.IsZero(m.CreatedAt) { // not required
+		return nil
+	}
+
+	if err := validate.FormatOf("created_at", "body", "date", m.CreatedAt.String(), formats); err != nil {
+		return err
+	}
+
 	return nil
 }
 

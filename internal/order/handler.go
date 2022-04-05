@@ -24,7 +24,7 @@ func (o *orderHandler) getAll(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, orders)
+	c.JSON(http.StatusOK, OrdersToResponse(orders))
 }
 
 

@@ -13,7 +13,7 @@ JWTConfig:
   SecretKey: dummySecretKey
 
 DBConfig:
-  DataSourceName: postgres://postgres:123456Mert@localhost:5432/cart?sslmode=disabled
+  DataSourceName: postgres://postgres:123456Mert@localhost:5432/cart?sslmode=disable
   # Name: cart
   MaxOpen: 50
   MaxIdle: 50
