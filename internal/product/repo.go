@@ -14,10 +14,10 @@ func NewProductRepository(db *gorm.DB) *ProductRepository {
 	return &ProductRepository{db: db}
 }
 
-func (o *ProductRepository) create(b *models.Product) (*models.Product, error) {
+func (p *ProductRepository) create(b *models.Product) (*models.Product, error) {
 	zap.L().Debug("product.repo.create", zap.Reflect("product", b))
 
-	if err := o.db.Create(b).Error; err != nil {
+	if err := p.db.Create(b).Error; err != nil {
 		zap.L().Error("product.repo.Create failed to create product", zap.Error(err))
 		return nil, err
 	}
@@ -25,11 +25,11 @@ func (o *ProductRepository) create(b *models.Product) (*models.Product, error) {
 	return b, nil
 }
 
-func (o *ProductRepository) getAll() (*[]models.Product, error) {
+func (p *ProductRepository) getAll() (*[]models.Product, error) {
 	zap.L().Debug("product.repo.getAll")
 
 	var bs = &[]models.Product{}
-	if err := o.db.Preload("Product").Find(&bs).Error; err != nil {
+	if err := p.db.Preload("Product").Find(&bs).Error; err != nil {
 		zap.L().Error("product.repo.getAll failed to get products", zap.Error(err))
 		return nil, err
 	}
@@ -37,41 +37,41 @@ func (o *ProductRepository) getAll() (*[]models.Product, error) {
 	return bs, nil
 }
 
-func (o *ProductRepository) getByID(id string) (*models.Product, error) {
+func (p *ProductRepository) getByID(id string) (*models.Product, error) {
 	zap.L().Debug("product.repo.getByID", zap.Reflect("id", id))
 
 	var product = &models.Product{}
-	if result := o.db.Preload("Category").First(&product, id); result.Error != nil {
+	if result := p.db.Preload("Category").First(&product, id); result.Error != nil {
 		return nil, result.Error
 	}
 	return product, nil
 }
 
-func (o *ProductRepository) update(a *models.Product) (*models.Product, error) {
+func (p *ProductRepository) update(a *models.Product) (*models.Product, error) {
 	zap.L().Debug("product.repo.update", zap.Reflect("product", a))
 
-	if result := o.db.Save(&a); result.Error != nil {
+	if result := p.db.Save(&a); result.Error != nil {
 		return nil, result.Error
 	}
 
 	return a, nil
 }
 
-func (o *ProductRepository) delete(id string) error {
+func (p *ProductRepository) delete(id string) error {
 	zap.L().Debug("product.repo.delete", zap.Reflect("id", id))
 
-	product, err := o.getByID(id)
+	product, err := p.getByID(id)
 	if err != nil {
 		return err
 	}
 
-	if result := o.db.Delete(&product); result.Error != nil {
+	if result := p.db.Delete(&product); result.Error != nil {
 		return result.Error
 	}
 
 	return nil
 }
 
-func (o *ProductRepository) Migration() {
-	o.db.AutoMigrate(&models.Product{})
+func (p *ProductRepository) Migration() {
+	p.db.AutoMigrate(&models.Product{})
 }

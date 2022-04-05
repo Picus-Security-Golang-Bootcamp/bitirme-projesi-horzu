@@ -146,7 +146,6 @@ definitions:
     type: "object"
     required:
       - "product_name"
-      - "genre"
       - "price"
       - "rating"
       - "image"
@@ -219,4 +218,4 @@ definitions:
         description: a (key, value) map.
         type: object
 
-# swagger generate model -f docs/cart.yaml -m internal/ap
+# swagger generate model -f docs/cart.yaml -m internal/api

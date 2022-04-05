@@ -47,7 +47,7 @@ func main() {
 	// Order Repository
 	orderRepo := order.NewOrderRepository(DB)
 	orderRepo.Migration()
-	// order.NewOrderHandler(orderRouter, orderRepo)
+	order.NewOrderHandler(orderRouter, orderRepo)
 
 	
 	// Product Repository
