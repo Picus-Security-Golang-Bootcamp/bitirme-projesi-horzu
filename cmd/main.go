@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/horzu/golang/cart-api/pkg/config"
+	db "github.com/horzu/golang/cart-api/pkg/database"
 	logger "github.com/horzu/golang/cart-api/pkg/logging"
 )
 
@@ -19,4 +20,7 @@ func main() {
 	// Set gloabal logger
 	logger.NewLogger(cfg)
 	defer logger.Close()
+
+	DB := db.Connect(cfg)
+	
 }
