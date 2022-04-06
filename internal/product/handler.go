@@ -2,6 +2,7 @@ package product
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-openapi/strfmt"
@@ -18,6 +19,8 @@ func NewProductHandler(r *gin.RouterGroup, repo *ProductRepository){
 
 	r.POST("/create", h.create)
 	r.GET("/:id", h.getByID)
+	r.PUT("/:id", h.update)
+	r.DELETE("/:id", h.delete)
 }
 
 func (p *productHandler) create(c *gin.Context){
@@ -49,4 +52,39 @@ func (p *productHandler) getByID(c *gin.Context){
 	}
 
 	c.JSON(http.StatusOK, productToResponse(product))
+}
+
+func (p *productHandler) update(c *gin.Context){
+	id, err := strconv.Atoi(c.Param("id"))
+	if err!=nil{
+		c.JSON(httpErrors.ErrorResponse(err))
+		return
+	}
+	productBody := &api.Product{ID: int64(id)}
+	if err:=c.Bind(&productBody); err!=nil{
+		c.JSON(httpErrors.ErrorResponse(err))
+		return
+	}
+
+	if err:= productBody.Validate(strfmt.NewFormats()); err!=nil{
+		c.JSON(httpErrors.ErrorResponse(err))
+		return
+	}
+
+	product, err := p.repo.update(responseToProduct(productBody))
+	if err!=nil{
+		c.JSON(httpErrors.ErrorResponse(err))
+	}
+
+	c.JSON(http.StatusOK, productToResponse(product))
+}
+
+func (p *productHandler) delete(c *gin.Context){
+	err := p.repo.delete(c.Param("id"))
+	if err!=nil{
+		c.JSON(httpErrors.ErrorResponse(err))
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
 }

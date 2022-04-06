@@ -30,6 +30,7 @@ func main() {
 
 	DB := db.Connect(cfg)
 
+	gin.SetMode(gin.ReleaseMode)
 	r:= gin.Default()
 
 	srv := &http.Server{
