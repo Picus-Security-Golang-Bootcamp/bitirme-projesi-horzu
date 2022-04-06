@@ -13,6 +13,7 @@ import (
 	db "github.com/horzu/golang/cart-api/pkg/database"
 	"github.com/horzu/golang/cart-api/pkg/graceful"
 	logger "github.com/horzu/golang/cart-api/pkg/logging"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -62,6 +63,25 @@ func main() {
 			log.Fatalf("listen error: %v", err)
 		}
 	}()
+
+	r.GET("healthx", func(c *gin.Context){
+		c.JSON(http.StatusOK, nil)
+	})
+
+	r.GET("readyx", func (c *gin.Context){
+		db, err := DB.DB()
+		if err!=nil{
+			zap.L().Fatal("Cannot get sql database instance ", zap.Error(err))
+			c.JSON(http.StatusInternalServerError, nil)
+			return
+		}
+		if err := db.Ping(); err!=nil{
+			zap.L().Fatal("Cannot ping database ", zap.Error(err))
+			c.JSON(http.StatusInternalServerError, nil)
+			return
+		}
+		c.JSON(http.StatusOK, nil)
+	})
 
 	log.Println("Shopping Cart service started!")
 
