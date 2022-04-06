@@ -20,8 +20,7 @@ import (
 type Product struct {
 
 	// category
-	// Required: true
-	Category *Category `json:"category"`
+	Category *Category `json:"category,omitempty"`
 
 	// id
 	ID int64 `json:"id,omitempty"`
@@ -74,9 +73,8 @@ func (m *Product) Validate(formats strfmt.Registry) error {
 }
 
 func (m *Product) validateCategory(formats strfmt.Registry) error {
-
-	if err := validate.Required("category", "body", m.Category); err != nil {
-		return err
+	if swag.IsZero(m.Category) { // not required
+		return nil
 	}
 
 	if m.Category != nil {

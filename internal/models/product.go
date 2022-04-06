@@ -5,10 +5,10 @@ import "gorm.io/gorm"
 type Product struct {
 	gorm.Model   `bson:"id"`
 	Product_Name string `json:"product_name"`
-	Price        uint   `json:"price"`
-	Rating       uint   `json:"rating"`
+	Price        int64   `json:"price"`
+	Rating       int64   `json:"rating"`
 	Image        string `json:"image"`
-	Category     Category
+	// Category     Category
 }
 
 func (Product) TableName() string{

@@ -29,7 +29,7 @@ func (o *OrderRepository) getAll() (*[]models.Order, error) {
 	zap.L().Debug("Order.repo.getAll")
 
 	var bs = &[]models.Order{}
-	if err := o.db.Preload("Product").Find(&bs).Error; err != nil {
+	if err := o.db.Find(&bs).Error; err != nil {
 		zap.L().Error("order.repo.getAll failed to get orders", zap.Error(err))
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (o *OrderRepository) getByID(id string) (*models.Order, error) {
 	zap.L().Debug("Order.repo.getByID", zap.Reflect("id", id))
 
 	var order = &models.Order{}
-	if result := o.db.Preload("Product").First(&order, id); result.Error != nil {
+	if result := o.db.First(&order, id); result.Error != nil {
 		return nil, result.Error
 	}
 	return order, nil

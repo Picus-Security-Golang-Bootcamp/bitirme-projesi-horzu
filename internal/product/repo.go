@@ -41,7 +41,7 @@ func (p *ProductRepository) getByID(id string) (*models.Product, error) {
 	zap.L().Debug("product.repo.getByID", zap.Reflect("id", id))
 
 	var product = &models.Product{}
-	if result := p.db.Preload("Category").First(&product, id); result.Error != nil {
+	if result := p.db.First(&product, id); result.Error != nil {
 		return nil, result.Error
 	}
 	return product, nil

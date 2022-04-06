@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/horzu/golang/cart-api/internal/order"
+	"github.com/horzu/golang/cart-api/internal/product"
 	"github.com/horzu/golang/cart-api/pkg/config"
 	db "github.com/horzu/golang/cart-api/pkg/database"
 	"github.com/horzu/golang/cart-api/pkg/graceful"
@@ -41,7 +42,7 @@ func main() {
 	rootRouter := r.Group(cfg.ServerConfig.RouterPrefix)
 
 	orderRouter := rootRouter.Group("/orders")
-	// productRouter := rootRouter.Group("/products")
+	productRouter := rootRouter.Group("/products")
 
 
 	// Order Repository
@@ -51,9 +52,9 @@ func main() {
 
 	
 	// Product Repository
-	// productRepo := product.NewProductRepository(DB)
-	// productRepo.Migration()
-	// product.NewProductHandler(productRouter, productRepo)
+	productRepo := product.NewProductRepository(DB)
+	productRepo.Migration()
+	product.NewProductHandler(productRouter, productRepo)
 
 	go func(){
 		if err:= srv.ListenAndServe(); err!=http.ErrServerClosed{

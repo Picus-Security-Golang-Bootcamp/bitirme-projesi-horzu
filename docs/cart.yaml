@@ -152,7 +152,6 @@ definitions:
       - "price"
       - "rating"
       - "image"
-      - "category"
     properties:
       id:
         type: "integer"
