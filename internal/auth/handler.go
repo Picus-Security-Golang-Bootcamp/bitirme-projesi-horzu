@@ -21,6 +21,7 @@ func NewAuthHandler(r *gin.RouterGroup, cfg *config.Config){
 	a := authHandler{cfg:cfg}
 
 	r.POST("/login", a.login)
+	r.POST("/decode", a.VerifyToken)
 }
 
 func (a *authHandler) login(c *gin.Context){
@@ -47,4 +48,11 @@ func (a *authHandler) login(c *gin.Context){
 	token := jwtHelper.GenerateToken(jwtClaims, a.cfg.JWTConfig.SecretKey)
 
 	c.JSON(http.StatusOK, token)
+}
+
+func (a *authHandler) VerifyToken(c *gin.Context){
+	token := c.GetHeader("Authorization")
+	decodeClaims := jwtHelper.VerifyToken(token, a.cfg.JWTConfig.SecretKey)
+
+	c.JSON(http.StatusOK, decodeClaims)
 }
