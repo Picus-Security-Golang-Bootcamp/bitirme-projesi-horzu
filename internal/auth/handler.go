@@ -11,38 +11,41 @@ import (
 	httpErr "github.com/horzu/golang/cart-api/internal/httpErrors"
 	"github.com/horzu/golang/cart-api/pkg/config"
 	jwtHelper "github.com/horzu/golang/cart-api/pkg/jwt"
+	mw "github.com/horzu/golang/cart-api/pkg/middleware"
 )
 
 type authHandler struct {
 	cfg *config.Config
 }
 
-func NewAuthHandler(r *gin.RouterGroup, cfg *config.Config){
-	a := authHandler{cfg:cfg}
+func NewAuthHandler(r *gin.RouterGroup, cfg *config.Config) {
+	a := authHandler{cfg: cfg}
 
 	r.POST("/login", a.login)
+
+	r.Use(mw.AuthMiddleware(cfg.JWTConfig.SecretKey))
 	r.POST("/decode", a.VerifyToken)
 }
 
-func (a *authHandler) login(c *gin.Context){
+func (a *authHandler) login(c *gin.Context) {
 	var req api.Login
-	if err:=c.Bind(&req); err!=nil{
+	if err := c.Bind(&req); err != nil {
 		c.JSON(httpErr.ErrorResponse(httpErr.NewRestError(http.StatusBadRequest, "Check your request body", nil)))
 		return
 	}
 
 	user := GetUser(*req.Email, *req.Password)
-	if user == nil{
+	if user == nil {
 		c.JSON(httpErr.ErrorResponse(httpErr.NewRestError(http.StatusBadRequest, "user not found", nil)))
 	}
 
 	jwtClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userId": user.Id,
-		"email": user.Email,
-		"iat": time.Now().Unix(),
-		"iss": os.Getenv("ENV"),
-		"exp": time.Now().Add(24* time.Hour).Unix(),
-		"role": user.Roles,
+		"email":  user.Email,
+		"iat":    time.Now().Unix(),
+		"iss":    os.Getenv("ENV"),
+		"exp":    time.Now().Add(24 * time.Hour).Unix(),
+		"roles":   user.Roles,
 	})
 
 	token := jwtHelper.GenerateToken(jwtClaims, a.cfg.JWTConfig.SecretKey)
@@ -50,7 +53,7 @@ func (a *authHandler) login(c *gin.Context){
 	c.JSON(http.StatusOK, token)
 }
 
-func (a *authHandler) VerifyToken(c *gin.Context){
+func (a *authHandler) VerifyToken(c *gin.Context) {
 	token := c.GetHeader("Authorization")
 	decodeClaims := jwtHelper.VerifyToken(token, a.cfg.JWTConfig.SecretKey)
 
