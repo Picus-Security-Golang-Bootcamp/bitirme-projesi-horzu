@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/horzu/golang/cart-api/internal/auth"
 	"github.com/horzu/golang/cart-api/internal/order"
 	"github.com/horzu/golang/cart-api/internal/product"
 	"github.com/horzu/golang/cart-api/pkg/config"
@@ -59,6 +60,7 @@ func main() {
 
 	orderRouter := rootRouter.Group("/orders")
 	productRouter := rootRouter.Group("/products")
+	authRouter := rootRouter.Group("/user")
 
 
 	// Order Repository
@@ -71,6 +73,8 @@ func main() {
 	productRepo := product.NewProductRepository(DB)
 	productRepo.Migration()
 	product.NewProductHandler(productRouter, productRepo)
+
+	auth.NewAuthHandler(authRouter, cfg)
 
 	go func(){
 		if err:= srv.ListenAndServe(); err!=http.ErrServerClosed{
