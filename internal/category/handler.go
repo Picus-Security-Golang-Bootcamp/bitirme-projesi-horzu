@@ -48,12 +48,12 @@ func (p *categoryHandler) createBulk(c *gin.Context) {
 }
 
 func (p *categoryHandler) listAllCategories(c *gin.Context) {
-	category, err := p.repo.getAll()
+	categories, err := p.repo.getAll()
 	if err != nil {
 		c.JSON(httpErrors.ErrorResponse(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, categoryToResponse(category))
+	c.JSON(http.StatusOK, categoriesToResponse(categories))
 }
 

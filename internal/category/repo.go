@@ -33,7 +33,7 @@ func (p *CategoryRepository) getAll() (*[]models.Category, error) {
 	zap.L().Debug("category.repo.getAll")
 
 	var bs = &[]models.Category{}
-	if err := p.db.Preload("category").Find(&bs).Error; err != nil {
+	if err := p.db.Find(&bs).Error; err != nil {
 		zap.L().Error("category.repo.getAll failed to get categories", zap.Error(err))
 		return nil, err
 	}

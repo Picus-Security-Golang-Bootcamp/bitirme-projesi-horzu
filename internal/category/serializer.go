@@ -6,15 +6,20 @@ import (
 	"gorm.io/gorm"
 )
 
-func categoryToResponse(p *[]models.Category) []api.Category {
-	var allItems []api.Category
-	
-	for _, category := range *p{
-		allItems = append(allItems, api.Category{
-			Name: &category.Category_Name,
-		})
+func categoryToResponse(c models.Category) *api.Category{
+	return &api.Category{
+		Name: &c.Category_Name,
+		Image: &c.Image,
 	}
-	return allItems
+}
+
+func categoriesToResponse(cs *[]models.Category) []*api.Category {
+	categories := make([]*api.Category,0)
+	
+	for _, category := range *cs{
+		categories = append(categories, categoryToResponse(category))
+	}
+	return categories
 }
 
 func responseToCategory(a *api.Category) *models.Category {
