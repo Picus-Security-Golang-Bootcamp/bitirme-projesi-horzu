@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/horzu/golang/cart-api/internal/auth"
 	"github.com/horzu/golang/cart-api/internal/order"
 	"github.com/horzu/golang/cart-api/internal/product"
+	"github.com/horzu/golang/cart-api/internal/user"
 	"github.com/horzu/golang/cart-api/pkg/config"
 	db "github.com/horzu/golang/cart-api/pkg/database"
 	"github.com/horzu/golang/cart-api/pkg/graceful"
@@ -20,7 +20,7 @@ import (
 func main() {
 	log.Println("Cart service starting...")
 
-	// set env for local development
+	// Set env for local development
 	cfg, err := config.LoadConfig("./pkg/config/config-local")
 	if err!=nil{
 		log.Fatalf("loadconfig failed: %v", err)
@@ -30,6 +30,7 @@ func main() {
 	logger.NewLogger(cfg)
 	defer logger.Close()
 
+	// Connect to database
 	DB := db.Connect(cfg)
 
 	gin.SetMode(gin.ReleaseMode)
@@ -63,6 +64,14 @@ func main() {
 	authRouter := rootRouter.Group("/user")
 
 
+	// User Repository
+	userRepo := user.NewUserRepository(DB)
+	userRepo.Migration()
+	// user.NewUserHandler(userRooter, userRepo)
+	user.NewAuthHandler(authRouter, cfg, userRepo)
+
+
+
 	// Order Repository
 	orderRepo := order.NewOrderRepository(DB)
 	orderRepo.Migration()
@@ -73,8 +82,6 @@ func main() {
 	productRepo := product.NewProductRepository(DB)
 	productRepo.Migration()
 	product.NewProductHandler(productRouter, productRepo)
-
-	auth.NewAuthHandler(authRouter, cfg)
 
 	go func(){
 		if err:= srv.ListenAndServe(); err!=http.ErrServerClosed{

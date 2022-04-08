@@ -10,5 +10,5 @@ type Category struct {
 
 func (Category) TableName() string{
 	// default table name
-	return "products"
+	return "categories"
 }
