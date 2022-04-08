@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/horzu/golang/cart-api/internal/category"
 	"github.com/horzu/golang/cart-api/internal/order"
 	"github.com/horzu/golang/cart-api/internal/product"
 	"github.com/horzu/golang/cart-api/internal/user"
@@ -22,7 +23,7 @@ func main() {
 
 	// Set env for local development
 	cfg, err := config.LoadConfig("./pkg/config/config-local")
-	if err!=nil{
+	if err != nil {
 		log.Fatalf("loadconfig failed: %v", err)
 	}
 
@@ -34,26 +35,26 @@ func main() {
 	DB := db.Connect(cfg)
 
 	gin.SetMode(gin.ReleaseMode)
-	r:= gin.Default()
-	r.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string{
+	r := gin.Default()
+	r.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
 		// custom format arranged for logger
 		return fmt.Sprintf("%s - [%s] \"%s %s %s %d %s \"%s\" %s\"\n",
-		param.ClientIP,
-		param.TimeStamp.Format(time.RFC1123),
-		param.Method,
-		param.Path,
-		param.Request.Proto,
-		param.StatusCode,
-		param.Latency,
-		param.Request.UserAgent(),
-		param.ErrorMessage,
-	)
+			param.ClientIP,
+			param.TimeStamp.Format(time.RFC1123),
+			param.Method,
+			param.Path,
+			param.Request.Proto,
+			param.StatusCode,
+			param.Latency,
+			param.Request.UserAgent(),
+			param.ErrorMessage,
+		)
 	}))
 
 	srv := &http.Server{
-		Addr: fmt.Sprintf(":%d", cfg.ServerConfig.Port),
-		Handler: r,
-		ReadTimeout: time.Duration(cfg.ServerConfig.ReadTimeoutSecs * int(time.Second)),
+		Addr:         fmt.Sprintf(":%d", cfg.ServerConfig.Port),
+		Handler:      r,
+		ReadTimeout:  time.Duration(cfg.ServerConfig.ReadTimeoutSecs * int(time.Second)),
 		WriteTimeout: time.Duration(cfg.ServerConfig.WriteTimeoutSecs * int(time.Second)),
 	}
 
@@ -62,45 +63,46 @@ func main() {
 	orderRouter := rootRouter.Group("/orders")
 	productRouter := rootRouter.Group("/products")
 	authRouter := rootRouter.Group("/user")
-
+	categoryRouter := rootRouter.Group("/category")
 
 	// User Repository
 	userRepo := user.NewUserRepository(DB)
 	userRepo.Migration()
-	// user.NewUserHandler(userRooter, userRepo)
 	user.NewAuthHandler(authRouter, cfg, userRepo)
-
-
 
 	// Order Repository
 	orderRepo := order.NewOrderRepository(DB)
 	orderRepo.Migration()
 	order.NewOrderHandler(orderRouter, orderRepo)
 
-	
 	// Product Repository
 	productRepo := product.NewProductRepository(DB)
 	productRepo.Migration()
 	product.NewProductHandler(productRouter, productRepo)
 
-	go func(){
-		if err:= srv.ListenAndServe(); err!=http.ErrServerClosed{
+	// Category Repository
+	categoryRepo := category.NewCategoryRepository(DB)
+	categoryRepo.Migration()
+	category.NewCategoryHandler(categoryRouter, categoryRepo)
+
+	go func() {
+		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
 			log.Fatalf("listen error: %v", err)
 		}
 	}()
 
-	r.GET("healthx", func(c *gin.Context){
+	r.GET("healthx", func(c *gin.Context) {
 		c.JSON(http.StatusOK, nil)
 	})
 
-	r.GET("readyx", func (c *gin.Context){
+	r.GET("readyx", func(c *gin.Context) {
 		db, err := DB.DB()
-		if err!=nil{
+		if err != nil {
 			zap.L().Fatal("Cannot get sql database instance ", zap.Error(err))
 			c.JSON(http.StatusInternalServerError, nil)
 			return
 		}
-		if err := db.Ping(); err!=nil{
+		if err := db.Ping(); err != nil {
 			zap.L().Fatal("Cannot ping database ", zap.Error(err))
 			c.JSON(http.StatusInternalServerError, nil)
 			return

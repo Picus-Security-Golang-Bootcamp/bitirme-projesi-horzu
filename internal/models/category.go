@@ -4,7 +4,7 @@ import "gorm.io/gorm"
 
 type Category struct {
 	gorm.Model   `bson:"id"`
-	Category_Name string `json:"product_name"`
+	Category_Name string `json:"category_name"`
 	Image        string `json:"image"`
 }
 

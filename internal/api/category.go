@@ -19,6 +19,9 @@ import (
 // swagger:model Category
 type Category struct {
 
+	// id
+	ID int64 `json:"id,omitempty"`
+
 	// image
 	// Required: true
 	Image *string `json:"image"`
