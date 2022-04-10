@@ -15,15 +15,15 @@ type ProductImage struct {
 	ProductId int
 	ImageId   int
 
-	File *MediaFile
+	Image *MediaFile
 }
 
 func (pi *ProductImage) SetImage(f *MediaFile) {
-	pi.File = f
+	pi.Image = f
 }
 
 func (pi *ProductImage) GetImage() *MediaFile {
-	return pi.File
+	return pi.Image
 }
 
 func (u *ProductImage) BeforeCreate(tx *gorm.DB) (err error) {

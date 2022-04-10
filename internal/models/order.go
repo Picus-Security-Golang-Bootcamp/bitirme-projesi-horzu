@@ -12,6 +12,7 @@ type Order struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	DeletedAt   time.Time
+	UserId		string
 	OrderNumber string
 	TotalPrice  float64
 	Status      string
