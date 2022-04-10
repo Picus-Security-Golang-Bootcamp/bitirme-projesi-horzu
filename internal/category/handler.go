@@ -7,15 +7,19 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/horzu/golang/cart-api/internal/api"
 	"github.com/horzu/golang/cart-api/internal/httpErrors"
+	"github.com/horzu/golang/cart-api/pkg/config"
+	mw "github.com/horzu/golang/cart-api/pkg/middleware"
 )
 
 type categoryHandler struct {
+	cfg  *config.Config
 	repo *CategoryRepository
 }
 
-func NewCategoryHandler(r *gin.RouterGroup, repo *CategoryRepository) {
-	h := &categoryHandler{repo: repo}
-
+func NewCategoryHandler(r *gin.RouterGroup, cfg *config.Config, repo *CategoryRepository) {
+	h := &categoryHandler{repo: repo,
+		cfg: cfg,}
+	r.Use(mw.AuthMiddleware(cfg.JWTConfig.SecretKey))
 	r.POST("/createbulkcategory", h.createBulk)
 	r.GET("/listcategory", h.listAllCategories)
 

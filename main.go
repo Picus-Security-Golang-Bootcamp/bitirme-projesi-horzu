@@ -83,7 +83,7 @@ func main() {
 	// Category Repository
 	categoryRepo := category.NewCategoryRepository(DB)
 	categoryRepo.Migration()
-	category.NewCategoryHandler(categoryRouter, categoryRepo)
+	category.NewCategoryHandler(categoryRouter, cfg, categoryRepo)
 
 	go func() {
 		if err := srv.ListenAndServe(); err != http.ErrServerClosed {

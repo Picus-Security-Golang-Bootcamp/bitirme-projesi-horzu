@@ -3,7 +3,6 @@ package user
 import (
 	"fmt"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -27,14 +26,14 @@ func NewAuthHandler(r *gin.RouterGroup, cfg *config.Config, repo *UserRepository
 	repo: repo}
 
 	r.POST("/login", a.login)
-	r.POST("/register", a.Register)
+	r.POST("/signup", a.Signup)
 
 	r.Use(mw.AuthMiddleware(cfg.JWTConfig.SecretKey))
 	r.POST("/decode", a.VerifyToken)
 }
 
 
-func (a *authHandler) Register(c *gin.Context){
+func (a *authHandler) Signup(c *gin.Context){
 	var input *api.User
 
 	if err:= c.ShouldBindJSON(&input);err !=nil{
@@ -46,11 +45,12 @@ func (a *authHandler) Register(c *gin.Context){
 
 	user.Email = input.Email
 	user.Password = input.Password
+	user.IsAdmin = input.IsAdmin
 
 	_, err := a.repo.SaveUser(&user)
 
 	if err!=nil{
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "This email is already registered."})
 		return
 	}
 
@@ -82,8 +82,7 @@ func (a *authHandler) login(c *gin.Context) {
 		"isAdmin": user.IsAdmin,
 		"email": user.Email,
 		"iat":   time.Now().Unix(),
-		"iss":   os.Getenv("ENV"),
-		"exp":   time.Now().Add(24 * time.Hour).Unix(),
+		"exp":   time.Now().Add(time.Duration(a.cfg.JWTConfig.SessionTime) * time.Second).Unix(),
 	})
 
 	token := jwtHelper.GenerateToken(jwtClaims, a.cfg.JWTConfig.SecretKey)
