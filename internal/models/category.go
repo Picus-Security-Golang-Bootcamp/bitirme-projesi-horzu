@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type ProductCategory struct {
+type Category struct {
 	Id        string
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -17,7 +17,7 @@ type ProductCategory struct {
 	IsActive  bool
 }
 
-func (u *ProductCategory) BeforeCreate(tx *gorm.DB) (err error) {
+func (u *Category) BeforeCreate(tx *gorm.DB) (err error) {
 	u.Id = uuid.New().String()
 
 	return nil

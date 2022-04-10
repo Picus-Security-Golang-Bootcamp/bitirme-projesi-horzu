@@ -22,7 +22,7 @@ type Product struct {
 	Weight      float64
 	IsActive    bool
 
-	Category  *ProductCategory
+	Category  *Category
 	ImageFile []*ProductImage
 	Stock     *Stock
 }

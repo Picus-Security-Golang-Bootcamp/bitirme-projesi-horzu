@@ -25,6 +25,9 @@ type Category struct {
 	// name
 	// Required: true
 	Name *string `json:"name"`
+
+	// slug
+	Slug string `json:"slug,omitempty"`
 }
 
 // Validate validates this category
