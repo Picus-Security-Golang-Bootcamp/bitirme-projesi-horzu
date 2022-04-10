@@ -1,17 +1,34 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"time"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
 
 type Product struct {
-	gorm.Model   `bson:"id"`
-	Product_Name string `json:"product_name"`
-	Price        int64   `json:"price"`
-	Rating       int64   `json:"rating"`
-	Image        string `json:"image"`
-	// Category     Category
+	Id          string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   time.Time
+	CategoryId  int
+	Name        string
+	Slug        string
+	Description *string
+	Price       float64
+	Quantity    int
+	Rating      int64
+	Weight      float64
+	IsActive    bool
+
+	Category  *ProductCategory
+	ImageFile []*ProductImage
+	Stock     *Stock
 }
 
-func (Product) TableName() string{
-	// default table name
-	return "products"
+func (u *Product) BeforeCreate(tx *gorm.DB) (err error) {
+	u.Id = uuid.New().String()
+
+	return nil
 }

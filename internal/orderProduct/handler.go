@@ -1,4 +1,4 @@
-package product
+package orderProduct
 
 import (
 	"net/http"
@@ -9,12 +9,12 @@ import (
 	"github.com/horzu/golang/cart-api/internal/httpErrors"
 )
 
-type productHandler struct {
+type orderProductHandler struct {
 	repo *ProductRepository
 }
 
-func NewProductHandler(r *gin.RouterGroup, repo *ProductRepository){
-	h := &productHandler{repo: repo}
+func NewOrderProductHandler(r *gin.RouterGroup, repo *OrderProductRepository){
+	h := &orderProductHandler{repo: repo}
 
 	r.POST("/create", h.create)
 	r.GET("/:id", h.getByID)
@@ -22,7 +22,7 @@ func NewProductHandler(r *gin.RouterGroup, repo *ProductRepository){
 	r.DELETE("/:id", h.delete)
 }
 
-func (p *productHandler) create(c *gin.Context){
+func (p *orderProductHandler) create(c *gin.Context){
 	productBody := &api.Product{}
 		
 	if err:= c.Bind(productBody); err!=nil{
@@ -44,7 +44,7 @@ func (p *productHandler) create(c *gin.Context){
 	c.JSON(http.StatusOK, &product)
 }
 
-func (p *productHandler) getByID(c *gin.Context){
+func (p *orderProductHandler) getByID(c *gin.Context){
 	product, err := p.repo.getByID(c.Param("id"))
 	if err!=nil{
 		c.JSON(httpErrors.ErrorResponse(err))
@@ -54,7 +54,7 @@ func (p *productHandler) getByID(c *gin.Context){
 	c.JSON(http.StatusOK, productToResponse(product))
 }
 
-func (p *productHandler) update(c *gin.Context){
+func (p *orderProductHandler) update(c *gin.Context){
 	id := c.Param("id")
 	productBody := &api.Product{ID: id}
 	if err:=c.Bind(&productBody); err!=nil{
@@ -75,7 +75,7 @@ func (p *productHandler) update(c *gin.Context){
 	c.JSON(http.StatusOK, productToResponse(product))
 }
 
-func (p *productHandler) delete(c *gin.Context){
+func (p *orderProductHandler) delete(c *gin.Context){
 	err := p.repo.delete(c.Param("id"))
 	if err!=nil{
 		c.JSON(httpErrors.ErrorResponse(err))

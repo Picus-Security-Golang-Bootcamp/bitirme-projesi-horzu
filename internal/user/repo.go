@@ -72,37 +72,3 @@ func (u *UserRepository) SaveUser(b *models.User) (*models.User, error) {
 func VerifyPassword(password, hashedPassword string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }
-
-// func GetUser(email, password string) *UserRepository {
-// 	for _, v := range getUserList() {
-// 		if v.Email == email && v.Password == password {
-// 			return v
-// 		}
-
-// 	}
-// 	return nil
-// }
-
-// }
-// func GetUserList() []*User {
-// 	return []*User{
-// 		{
-// 			Id:       1,
-// 			Email:    "admin@mail.com",
-// 			Password: "1234admin",
-// 			Roles:    []string{"admin", "customer"},
-// 		},
-// 		{
-// 			Id:       2,
-// 			Email:    "customer1@mail.com",
-// 			Password: "customer1",
-// 			Roles:    []string{"customer"},
-// 		},
-// 		{
-// 			Id:       3,
-// 			Email:    "customer2@mail.com",
-// 			Password: "customer2",
-// 			Roles:    []string{"customer"},
-// 		},
-// 	}
-// }

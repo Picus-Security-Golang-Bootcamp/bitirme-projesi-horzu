@@ -14,6 +14,8 @@ require (
 	gorm.io/gorm v1.23.4
 )
 
+require github.com/google/uuid v1.3.0 // direct
+
 require (
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect

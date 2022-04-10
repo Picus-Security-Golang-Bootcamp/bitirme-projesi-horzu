@@ -1,4 +1,4 @@
-package product
+package orderProduct
 
 import (
 	"github.com/google/uuid"

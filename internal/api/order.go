@@ -20,20 +20,29 @@ import (
 // swagger:model Order
 type Order struct {
 
+	// cart id
+	CartID int64 `json:"cart_id,omitempty"`
+
 	// created at
 	// Format: date
 	CreatedAt strfmt.Date `json:"created_at,omitempty"`
 
-	// discount
-	// Required: true
-	Discount *int64 `json:"discount"`
-
 	// id
-	ID int64 `json:"id,omitempty"`
+	ID string `json:"id,omitempty"`
 
-	// order cart
+	// order number
+	OrderNumber string `json:"order_number,omitempty"`
+
+	// products
 	// Required: true
-	OrderCart []*Product `json:"order_cart"`
+	Products []*Product `json:"products"`
+
+	// total price
+	TotalPrice float64 `json:"total_price,omitempty"`
+
+	// user id
+	// Required: true
+	UserID *int64 `json:"user_id"`
 }
 
 // Validate validates this order
@@ -44,11 +53,11 @@ func (m *Order) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateDiscount(formats); err != nil {
+	if err := m.validateProducts(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateOrderCart(formats); err != nil {
+	if err := m.validateUserID(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -70,32 +79,23 @@ func (m *Order) validateCreatedAt(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Order) validateDiscount(formats strfmt.Registry) error {
+func (m *Order) validateProducts(formats strfmt.Registry) error {
 
-	if err := validate.Required("discount", "body", m.Discount); err != nil {
+	if err := validate.Required("products", "body", m.Products); err != nil {
 		return err
 	}
 
-	return nil
-}
-
-func (m *Order) validateOrderCart(formats strfmt.Registry) error {
-
-	if err := validate.Required("order_cart", "body", m.OrderCart); err != nil {
-		return err
-	}
-
-	for i := 0; i < len(m.OrderCart); i++ {
-		if swag.IsZero(m.OrderCart[i]) { // not required
+	for i := 0; i < len(m.Products); i++ {
+		if swag.IsZero(m.Products[i]) { // not required
 			continue
 		}
 
-		if m.OrderCart[i] != nil {
-			if err := m.OrderCart[i].Validate(formats); err != nil {
+		if m.Products[i] != nil {
+			if err := m.Products[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("order_cart" + "." + strconv.Itoa(i))
+					return ve.ValidateName("products" + "." + strconv.Itoa(i))
 				} else if ce, ok := err.(*errors.CompositeError); ok {
-					return ce.ValidateName("order_cart" + "." + strconv.Itoa(i))
+					return ce.ValidateName("products" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -106,11 +106,20 @@ func (m *Order) validateOrderCart(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *Order) validateUserID(formats strfmt.Registry) error {
+
+	if err := validate.Required("user_id", "body", m.UserID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // ContextValidate validate this order based on the context it is used
 func (m *Order) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.contextValidateOrderCart(ctx, formats); err != nil {
+	if err := m.contextValidateProducts(ctx, formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -120,16 +129,16 @@ func (m *Order) ContextValidate(ctx context.Context, formats strfmt.Registry) er
 	return nil
 }
 
-func (m *Order) contextValidateOrderCart(ctx context.Context, formats strfmt.Registry) error {
+func (m *Order) contextValidateProducts(ctx context.Context, formats strfmt.Registry) error {
 
-	for i := 0; i < len(m.OrderCart); i++ {
+	for i := 0; i < len(m.Products); i++ {
 
-		if m.OrderCart[i] != nil {
-			if err := m.OrderCart[i].ContextValidate(ctx, formats); err != nil {
+		if m.Products[i] != nil {
+			if err := m.Products[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("order_cart" + "." + strconv.Itoa(i))
+					return ve.ValidateName("products" + "." + strconv.Itoa(i))
 				} else if ce, ok := err.(*errors.CompositeError); ok {
-					return ce.ValidateName("order_cart" + "." + strconv.Itoa(i))
+					return ce.ValidateName("products" + "." + strconv.Itoa(i))
 				}
 				return err
 			}

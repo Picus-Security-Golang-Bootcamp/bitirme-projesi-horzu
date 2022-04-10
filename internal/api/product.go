@@ -23,15 +23,15 @@ type Product struct {
 	Category *Category `json:"category,omitempty"`
 
 	// id
-	ID int64 `json:"id,omitempty"`
+	ID string `json:"id,omitempty"`
 
 	// image
 	// Required: true
-	Image *string `json:"image"`
+	Image *Images `json:"image"`
 
 	// price
 	// Required: true
-	Price *int64 `json:"price"`
+	Price *float64 `json:"price"`
 
 	// product name
 	// Required: true
@@ -97,6 +97,17 @@ func (m *Product) validateImage(formats strfmt.Registry) error {
 		return err
 	}
 
+	if m.Image != nil {
+		if err := m.Image.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("image")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("image")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -135,6 +146,10 @@ func (m *Product) ContextValidate(ctx context.Context, formats strfmt.Registry) 
 		res = append(res, err)
 	}
 
+	if err := m.contextValidateImage(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
@@ -149,6 +164,22 @@ func (m *Product) contextValidateCategory(ctx context.Context, formats strfmt.Re
 				return ve.ValidateName("category")
 			} else if ce, ok := err.(*errors.CompositeError); ok {
 				return ce.ValidateName("category")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *Product) contextValidateImage(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Image != nil {
+		if err := m.Image.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("image")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("image")
 			}
 			return err
 		}

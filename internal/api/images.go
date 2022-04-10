@@ -14,10 +14,10 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// Category category
+// Images images
 //
-// swagger:model Category
-type Category struct {
+// swagger:model Images
+type Images struct {
 
 	// id
 	ID string `json:"id,omitempty"`
@@ -25,13 +25,21 @@ type Category struct {
 	// name
 	// Required: true
 	Name *string `json:"name"`
+
+	// url
+	// Required: true
+	URL *string `json:"url"`
 }
 
-// Validate validates this category
-func (m *Category) Validate(formats strfmt.Registry) error {
+// Validate validates this images
+func (m *Images) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateName(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateURL(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -41,7 +49,7 @@ func (m *Category) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Category) validateName(formats strfmt.Registry) error {
+func (m *Images) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Required("name", "body", m.Name); err != nil {
 		return err
@@ -50,13 +58,22 @@ func (m *Category) validateName(formats strfmt.Registry) error {
 	return nil
 }
 
-// ContextValidate validates this category based on context it is used
-func (m *Category) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+func (m *Images) validateURL(formats strfmt.Registry) error {
+
+	if err := validate.Required("url", "body", m.URL); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// ContextValidate validates this images based on context it is used
+func (m *Images) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (m *Category) MarshalBinary() ([]byte, error) {
+func (m *Images) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -64,8 +81,8 @@ func (m *Category) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *Category) UnmarshalBinary(b []byte) error {
-	var res Category
+func (m *Images) UnmarshalBinary(b []byte) error {
+	var res Images
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
