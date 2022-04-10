@@ -13,7 +13,7 @@ type productCategoryHandler struct {
 	repo *ProductCategoryRepository
 }
 
-func NewProductHandler(r *gin.RouterGroup, repo *ProductCategoryRepository){
+func NewProductCategoryHandler(r *gin.RouterGroup, repo *ProductCategoryRepository){
 	h := &productCategoryHandler{repo: repo}
 
 	r.POST("/create", h.create)

@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/horzu/golang/cart-api/internal/category"
 	"github.com/horzu/golang/cart-api/internal/order"
 	"github.com/horzu/golang/cart-api/internal/product"
+	"github.com/horzu/golang/cart-api/internal/productCategory"
 	"github.com/horzu/golang/cart-api/internal/user"
 	"github.com/horzu/golang/cart-api/pkg/config"
 	db "github.com/horzu/golang/cart-api/pkg/database"
@@ -81,9 +81,9 @@ func main() {
 	product.NewProductHandler(productRouter, productRepo)
 
 	// Category Repository
-	categoryRepo := category.NewCategoryRepository(DB)
+	categoryRepo := productCategory.NewProductCategoryRepository(DB)
 	categoryRepo.Migration()
-	category.NewCategoryHandler(categoryRouter, categoryRepo)
+	productCategory.NewProductCategoryHandler(categoryRouter, categoryRepo)
 
 	go func() {
 		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
