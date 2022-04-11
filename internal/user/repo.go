@@ -31,7 +31,7 @@ func (u *UserRepository) GetUserList() (*[]models.User, error) {
 	return ul, nil
 }
 
-func (u *UserRepository) GetUser(email, password string) (*models.User, error) {
+func (u *UserRepository) GetUser(email string) (*models.User, error) {
 	zap.L().Debug("user.repo.getuser", zap.Reflect("email", email))
 
 	var user = &models.User{}

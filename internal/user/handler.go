@@ -32,20 +32,18 @@ func NewAuthHandler(r *gin.RouterGroup, cfg *config.Config, repo *UserRepository
 	r.POST("/decode", a.VerifyToken)
 }
 
+type tokenStruct struct{
+	token string
+	refreshToken string
+}
 
 func (a *authHandler) Signup(c *gin.Context){
-	var input *api.User
+	user := models.User{}
 
-	if err:= c.ShouldBindJSON(&input);err !=nil{
+	if err:= c.Bind(&user);err !=nil{
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	user := models.User{}
-
-	user.Email = input.Email
-	user.Password = input.Password
-	user.IsAdmin = input.IsAdmin
 
 	_, err := a.repo.SaveUser(&user)
 
@@ -68,7 +66,7 @@ func (a *authHandler) login(c *gin.Context) {
 	u.Email = *req.Email
 	u.Password = *req.Password
 
-	user, err := a.repo.GetUser(u.Email, u.Password)
+	user, err := a.repo.LoginCheck(u.Email, u.Password)
 	fmt.Println(user)
 	if err != nil {
 		c.JSON(httpErrors.ErrorResponse(err))
@@ -78,16 +76,29 @@ func (a *authHandler) login(c *gin.Context) {
 		c.JSON(httpErr.ErrorResponse(httpErr.NewRestError(http.StatusBadRequest, "user not found", nil)))
 	}
 
-	jwtClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+	jwtClaimsForToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"isAdmin": user.IsAdmin,
+		"email": user.Email,
+		"iat":   time.Now().Unix(),
+		"exp":   time.Now().Add(time.Duration(a.cfg.JWTConfig.SessionTime) * time.Second).Unix(),
+	})
+	jwtClaimsForRefreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"isAdmin": user.IsAdmin,
 		"email": user.Email,
 		"iat":   time.Now().Unix(),
 		"exp":   time.Now().Add(time.Duration(a.cfg.JWTConfig.SessionTime) * time.Second).Unix(),
 	})
 
-	token := jwtHelper.GenerateToken(jwtClaims, a.cfg.JWTConfig.SecretKey)
+	token := jwtHelper.GenerateToken(jwtClaimsForToken, a.cfg.JWTConfig.SecretKey)
+	refreshToken := jwtHelper.GenerateToken(jwtClaimsForRefreshToken, a.cfg.JWTConfig.SecretKey)
 
-	c.JSON(http.StatusOK, token)
+	tokens:= &tokenStruct{
+		token: token,
+		refreshToken: refreshToken,
+	}
+	fmt.Println(tokens)
+
+	c.JSON(http.StatusOK, &tokens.token)
 }
 
 func (a *authHandler) VerifyToken(c *gin.Context) {
