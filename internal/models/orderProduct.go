@@ -8,10 +8,10 @@ import (
 )
 
 type OrderProduct struct {
-	Id          string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   time.Time
+	Id         string
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+	DeletedAt  gorm.DeletedAt `gorm:"index"`
 	OrderId    int
 	ProductId  int
 	Quantity   int

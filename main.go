@@ -11,6 +11,7 @@ import (
 	"github.com/horzu/golang/cart-api/internal/category"
 	"github.com/horzu/golang/cart-api/internal/order"
 	"github.com/horzu/golang/cart-api/internal/product"
+	"github.com/horzu/golang/cart-api/internal/role"
 	"github.com/horzu/golang/cart-api/internal/user"
 	"github.com/horzu/golang/cart-api/pkg/config"
 	db "github.com/horzu/golang/cart-api/pkg/database"
@@ -67,6 +68,10 @@ func main() {
 	categoryRouter := rootRouter.Group("/category")
 	cartRouter := rootRouter.Group("/cart")
 
+	// Role Repository
+	roleRepo := role.NewRoleRepository(DB)
+	roleRepo.Migration()
+	roleRepo.InserSampleData()
 	// User Repository
 	userRepo := user.NewUserRepository(DB)
 	userRepo.Migration()

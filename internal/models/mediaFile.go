@@ -11,9 +11,9 @@ type MediaFile struct {
 	Id        string
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt time.Time
-	Filename *string
-	Url      *string
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+	Filename  string
+	Url       string
 }
 
 func (u *MediaFile) BeforeCreate(tx *gorm.DB) (err error) {

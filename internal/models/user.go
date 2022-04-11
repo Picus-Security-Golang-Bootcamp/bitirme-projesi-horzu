@@ -14,10 +14,11 @@ type User struct {
 	Id        string
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 	Email     string `gorm:"size:255;not null;unique" json:"email"`
 	Password  string `gorm:"size:255;not null;" json:"password"`
-	IsAdmin   bool   `gorm:"not null; default:false" json:"is_admin"`
+	RoleId    int64 `gorm:"not null; default:0" json:"role_id"`
+	Role      Role
 }
 
 // BeforeSave hashes password before saving to database

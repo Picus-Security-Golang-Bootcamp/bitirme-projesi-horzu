@@ -1,7 +1,6 @@
 package user
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -28,7 +27,7 @@ func NewAuthHandler(r *gin.RouterGroup, cfg *config.Config, repo *UserRepository
 	r.POST("/login", a.login)
 	r.POST("/signup", a.Signup)
 
-	r.Use(mw.AuthMiddleware(cfg.JWTConfig.SecretKey))
+	r.Use(mw.AdminAuthMiddleware(cfg.JWTConfig.SecretKey))
 	r.POST("/decode", a.VerifyToken)
 }
 
@@ -67,7 +66,6 @@ func (a *authHandler) login(c *gin.Context) {
 	u.Password = *req.Password
 
 	user, err := a.repo.LoginCheck(u.Email, u.Password)
-	fmt.Println(user)
 	if err != nil {
 		c.JSON(httpErrors.ErrorResponse(err))
 		return
@@ -77,13 +75,13 @@ func (a *authHandler) login(c *gin.Context) {
 	}
 
 	jwtClaimsForToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"isAdmin": user.IsAdmin,
+		"role": user.Role.Role,
 		"email": user.Email,
 		"iat":   time.Now().Unix(),
 		"exp":   time.Now().Add(time.Duration(a.cfg.JWTConfig.SessionTime) * time.Second).Unix(),
 	})
 	jwtClaimsForRefreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"isAdmin": user.IsAdmin,
+		"role": user.Role.Role,
 		"email": user.Email,
 		"iat":   time.Now().Unix(),
 		"exp":   time.Now().Add(time.Duration(a.cfg.JWTConfig.SessionTime) * time.Second).Unix(),
@@ -96,7 +94,6 @@ func (a *authHandler) login(c *gin.Context) {
 		token: token,
 		refreshToken: refreshToken,
 	}
-	fmt.Println(tokens)
 
 	c.JSON(http.StatusOK, &tokens.token)
 }

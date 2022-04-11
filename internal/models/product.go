@@ -11,11 +11,11 @@ type Product struct {
 	Id          string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
-	DeletedAt   time.Time
+	DeletedAt   gorm.DeletedAt `gorm:"index"`
 	CategoryId  int
 	Name        string
 	Slug        string
-	Description *string
+	Description string
 	Price       float64
 	Quantity    int
 	Rating      int64

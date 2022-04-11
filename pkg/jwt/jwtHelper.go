@@ -7,11 +7,11 @@ import (
 )
 
 type DecodedToken struct {
-	Iat     int    `json:"iat"`
-	IsAdmin bool   `json:"isAdmin"`
-	UserId  string `json:"userId"`
-	Email   string `json:"email"`
-	Iss     string `json:"iss"`
+	Iat    int         `json:"iat"`
+	Role  string `json:"role"`
+	UserId string      `json:"id"`
+	Email  string      `json:"email"`
+	Iss    string      `json:"iss"`
 }
 
 func GenerateToken(claims *jwt.Token, secret string) string {

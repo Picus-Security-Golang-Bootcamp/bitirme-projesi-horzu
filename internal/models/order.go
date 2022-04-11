@@ -11,7 +11,7 @@ type Order struct {
 	Id          string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
-	DeletedAt   time.Time
+	DeletedAt   gorm.DeletedAt `gorm:"index"`
 	UserId		string
 	OrderNumber string
 	TotalPrice  float64

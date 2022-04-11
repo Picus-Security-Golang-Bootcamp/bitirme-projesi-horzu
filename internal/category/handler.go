@@ -19,7 +19,7 @@ type categoryHandler struct {
 func NewCategoryHandler(r *gin.RouterGroup, cfg *config.Config, repo *CategoryRepository) {
 	h := &categoryHandler{repo: repo,
 		cfg: cfg,}
-	r.Use(mw.AuthMiddleware(cfg.JWTConfig.SecretKey))
+	r.Use(mw.AdminAuthMiddleware(cfg.JWTConfig.SecretKey))
 	r.POST("/createbulkcategory", h.createBulk)
 	r.GET("/listcategory", h.listAllCategories)
 

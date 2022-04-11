@@ -11,7 +11,7 @@ type ProductImage struct {
 	Id        string
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 	ProductId int
 	ImageId   int
 

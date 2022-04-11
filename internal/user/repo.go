@@ -45,7 +45,7 @@ func (p *UserRepository) LoginCheck(email, password string) (*models.User, error
 	zap.L().Debug("user.repo.LoginCheck", zap.Reflect("email", email))
 
 	var user = &models.User{}
-	if result := p.db.First(&user,  "email = ?", email); result.Error != nil {
+	if result := p.db.Preload("Role").First(&user,  "email = ?", email); result.Error != nil {
 		return nil, result.Error
 	}
 
@@ -61,7 +61,7 @@ func (p *UserRepository) LoginCheck(email, password string) (*models.User, error
 func (u *UserRepository) SaveUser(b *models.User) (*models.User, error) {
 	zap.L().Debug("user.repo.create", zap.Reflect("user", b))
 
-	if err := u.db.Create(b).Error; err != nil {
+	if err := u.db.Preload("Role").Create(b).Error; err != nil {
 		zap.L().Error("user.repo.Create failed to create user", zap.Error(err))
 		return nil, err
 	}
