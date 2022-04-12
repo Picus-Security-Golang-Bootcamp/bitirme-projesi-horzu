@@ -23,9 +23,9 @@ type Cart struct {
 	// id
 	ID string `json:"id,omitempty"`
 
-	// products
+	// items
 	// Required: true
-	Products []*CartProduct `json:"products"`
+	Items []*CartItem `json:"items"`
 
 	// total price
 	// Required: true
@@ -40,7 +40,7 @@ type Cart struct {
 func (m *Cart) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateProducts(formats); err != nil {
+	if err := m.validateItems(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -58,23 +58,23 @@ func (m *Cart) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Cart) validateProducts(formats strfmt.Registry) error {
+func (m *Cart) validateItems(formats strfmt.Registry) error {
 
-	if err := validate.Required("products", "body", m.Products); err != nil {
+	if err := validate.Required("items", "body", m.Items); err != nil {
 		return err
 	}
 
-	for i := 0; i < len(m.Products); i++ {
-		if swag.IsZero(m.Products[i]) { // not required
+	for i := 0; i < len(m.Items); i++ {
+		if swag.IsZero(m.Items[i]) { // not required
 			continue
 		}
 
-		if m.Products[i] != nil {
-			if err := m.Products[i].Validate(formats); err != nil {
+		if m.Items[i] != nil {
+			if err := m.Items[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("products" + "." + strconv.Itoa(i))
+					return ve.ValidateName("items" + "." + strconv.Itoa(i))
 				} else if ce, ok := err.(*errors.CompositeError); ok {
-					return ce.ValidateName("products" + "." + strconv.Itoa(i))
+					return ce.ValidateName("items" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -118,7 +118,7 @@ func (m *Cart) validateUser(formats strfmt.Registry) error {
 func (m *Cart) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.contextValidateProducts(ctx, formats); err != nil {
+	if err := m.contextValidateItems(ctx, formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -132,16 +132,16 @@ func (m *Cart) ContextValidate(ctx context.Context, formats strfmt.Registry) err
 	return nil
 }
 
-func (m *Cart) contextValidateProducts(ctx context.Context, formats strfmt.Registry) error {
+func (m *Cart) contextValidateItems(ctx context.Context, formats strfmt.Registry) error {
 
-	for i := 0; i < len(m.Products); i++ {
+	for i := 0; i < len(m.Items); i++ {
 
-		if m.Products[i] != nil {
-			if err := m.Products[i].ContextValidate(ctx, formats); err != nil {
+		if m.Items[i] != nil {
+			if err := m.Items[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("products" + "." + strconv.Itoa(i))
+					return ve.ValidateName("items" + "." + strconv.Itoa(i))
 				} else if ce, ok := err.(*errors.CompositeError); ok {
-					return ce.ValidateName("products" + "." + strconv.Itoa(i))
+					return ce.ValidateName("items" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
