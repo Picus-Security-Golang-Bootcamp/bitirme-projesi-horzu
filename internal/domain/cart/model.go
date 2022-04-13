@@ -1,9 +1,11 @@
 package cart
 
 import (
+	"os/user"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/horzu/golang/cart-api/internal/domain/cartItem"
 	"gorm.io/gorm"
 )
 
@@ -16,8 +18,8 @@ type Cart struct {
 	TotalPrice float64
 	Status     string
 
-	Items *[]CartItem `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	User  *User
+	Items *[]cartItem.CartItem `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	User  *user.User
 }
 
 func NewCart(uid string) *Cart {

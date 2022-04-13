@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/horzu/golang/cart-api/internal/domain/orderProduct"
 	"gorm.io/gorm"
 )
 

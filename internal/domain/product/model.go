@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/horzu/golang/cart-api/internal/domain/category"
+	"github.com/horzu/golang/cart-api/internal/domain/mediaFile"
 	"github.com/horzu/golang/cart-api/internal/domain/stock"
 	"gorm.io/gorm"
 )
@@ -25,7 +26,7 @@ type Product struct {
 	IsActive    bool
 
 	Category  *category.Category
-	ImageFile []*mediaFile.ProductImage
+	ImageFile []*mediaFile.MediaFile
 	Stock     *stock.Stock
 }
 

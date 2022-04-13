@@ -3,7 +3,6 @@ package cart
 import (
 	"github.com/horzu/golang/cart-api/internal/domain/cartItem"
 	"github.com/horzu/golang/cart-api/internal/domain/product"
-	"github.com/horzu/golang/cart-api/internal/models"
 )
 
 type CartService struct {
@@ -40,7 +39,7 @@ func (service *CartService) AddItem(sku string, userID string, orderQuantity uin
 	if orderQuantity < 0 {
 		return ErrInvalidOrder
 	}
-	err = service.cartItemRepo.Create(models.NewCartItem(addedProduct.Id, cart.Id, orderQuantity))
+	err = service.cartItemRepo.Create(cartItem.NewCartItem(addedProduct.Id, cart.Id, orderQuantity))
 
 	return err
 }
@@ -72,7 +71,7 @@ func (service *CartService) UpdateItem(sku string, userID string, updateQuantity
 }
 
 // GetCartItems returns the items inside the given user's cart
-func (service *CartService) GetCartItems(userID string) ([]models.CartItem, error) {
+func (service *CartService) GetCartItems(userID string) ([]cartItem.CartItem, error) {
 	cart, err := service.cartRepo.FindOrCreateByUserID(userID)
 	if err != nil {
 		return nil, err

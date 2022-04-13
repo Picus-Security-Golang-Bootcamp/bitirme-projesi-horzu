@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/horzu/golang/cart-api/internal/domain/mediaFile"
 	"gorm.io/gorm"
 )
 
@@ -15,14 +16,14 @@ type ProductImage struct {
 	ProductId int
 	ImageId   int
 
-	Image *mediafile.MediaFile
+	Image *mediaFile.MediaFile
 }
 
-func (pi *ProductImage) SetImage(f *mediafile.MediaFile) {
+func (pi *ProductImage) SetImage(f *mediaFile.MediaFile) {
 	pi.Image = f
 }
 
-func (pi *ProductImage) GetImage() *mediafile.MediaFile {
+func (pi *ProductImage) GetImage() *mediaFile.MediaFile {
 	return pi.Image
 }
 
