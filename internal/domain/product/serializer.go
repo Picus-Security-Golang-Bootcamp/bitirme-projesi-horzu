@@ -1,25 +1,27 @@
 package product
 
 import (
-	"github.com/google/uuid"
 	"github.com/horzu/golang/cart-api/internal/api"
 )
 
 func productToResponse(p *Product) api.Product {
 	return api.Product{
-		ID:          p.Id,
-		Price:       &p.Price,
-		ProductName: &p.Name,
-		Rating:      &p.Rating,
+		Sku:        &p.SKU,
+		Name:       &p.Name,
+		Desc:       &p.Description,
+		Price:      &p.Price,
+		StockCount: &p.Quantity,
+		CategoryID: &p.CategoryId,
 	}
 }
 
 func responseToProduct(a *api.Product) *Product {
-	id := uuid.New().String()
 	return &Product{
-		Id:     id,
-		Name:   *a.ProductName,
-		Price:  *a.Price,
-		Rating: *a.Rating,
+		SKU:         *a.Sku,
+		Name:        *a.Name,
+		Description: *a.Desc,
+		Price:       *a.Price,
+		Quantity:    *a.StockCount,
+		CategoryId:  *a.CategoryID,
 	}
 }

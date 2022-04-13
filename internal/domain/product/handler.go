@@ -7,80 +7,104 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/horzu/golang/cart-api/internal/api"
 	"github.com/horzu/golang/cart-api/internal/httpErrors"
+	"github.com/horzu/golang/cart-api/pkg/config"
+	mw "github.com/horzu/golang/cart-api/pkg/middleware"
+	"github.com/horzu/golang/cart-api/pkg/pagination"
 )
 
 type productHandler struct {
-	repo *ProductRepository
+	service Service
+	cfg     *config.Config
+
 }
 
-func NewProductHandler(r *gin.RouterGroup, repo *ProductRepository){
-	h := &productHandler{repo: repo}
+func NewProductHandler(r *gin.RouterGroup, cfg *config.Config, service Service) {
+	h := &productHandler{service: service, cfg: cfg}
+	r.Use(mw.AdminAuthMiddleware(cfg.JWTConfig.SecretKey))
 
-	r.POST("/create", h.Create)
-	r.GET("/:id", h.GetByID)
-	r.PUT("/:id", h.Update)
-	r.DELETE("/:id", h.Delete)
+	r.POST("/create", h.create)
+	r.PUT("/:sku", h.update)
+	r.DELETE("/:sku", h.delete)
+	r.GET("/list", h.listProduct)
+	r.GET("/search/:sku", h.searchProduct)
 }
 
-func (p *productHandler) Create(c *gin.Context){
+func (p *productHandler) create(c *gin.Context) {
 	productBody := &api.Product{}
-		
-	if err:= c.Bind(productBody); err!=nil{
+
+	if err := c.Bind(productBody); err != nil {
 		c.JSON(httpErrors.ErrorResponse(httpErrors.CannotBindGivenData))
 		return
 	}
 
-	if err:= productBody.Validate(strfmt.NewFormats()); err!=nil{
+	if err := productBody.Validate(strfmt.NewFormats()); err != nil {
 		c.JSON(httpErrors.ErrorResponse(err))
 		return
 	}
 
-	product, err := p.repo.Create(responseToProduct(productBody))
-	if err!=nil{
+	productCreated := responseToProduct(productBody)
+
+	err := p.service.CreateProduct(c.Request.Context(), productCreated.Name, productCreated.Description, *productBody.StockCount, *productBody.Price, productCreated.CategoryId)
+	if err != nil {
 		c.JSON(httpErrors.ErrorResponse(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, &product)
+	c.JSON(http.StatusOK, &productCreated)
 }
 
-func (p *productHandler) GetByID(c *gin.Context){
-	product, err := p.repo.GetByID(c.Param("id"))
-	if err!=nil{
+func (p *productHandler) update(c *gin.Context) {
+	sku := c.Param("sku")
+	productBody := &api.Product{Sku: &sku}
+	if err := c.Bind(&productBody); err != nil {
 		c.JSON(httpErrors.ErrorResponse(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, productToResponse(product))
+	if err := productBody.Validate(strfmt.NewFormats()); err != nil {
+		c.JSON(httpErrors.ErrorResponse(err))
+		return
+	}
+
+	err := p.service.UpdateProduct(c.Request.Context(), responseToProduct(productBody))
+	if err != nil {
+		c.JSON(httpErrors.ErrorResponse(err))
+	}
+
+	c.JSON(http.StatusOK, "Product Updated")
 }
 
-func (p *productHandler) Update(c *gin.Context){
-	id := c.Param("id")
-	productBody := &api.Product{ID: id}
-	if err:=c.Bind(&productBody); err!=nil{
+func (p *productHandler) delete(c *gin.Context) {
+	err := p.service.DeleteProduct(c.Request.Context(), c.Param("sku"))
+	if err != nil {
 		c.JSON(httpErrors.ErrorResponse(err))
 		return
 	}
 
-	if err:= productBody.Validate(strfmt.NewFormats()); err!=nil{
-		c.JSON(httpErrors.ErrorResponse(err))
-		return
-	}
-
-	product, err := p.repo.Update(responseToProduct(productBody))
-	if err!=nil{
-		c.JSON(httpErrors.ErrorResponse(err))
-	}
-
-	c.JSON(http.StatusOK, productToResponse(product))
+	c.JSON(http.StatusNoContent, "Product deleted")
 }
 
-func (p *productHandler) Delete(c *gin.Context){
-	err := p.repo.Delete(c.Param("id"))
-	if err!=nil{
-		c.JSON(httpErrors.ErrorResponse(err))
+func (p *productHandler) listProduct(c *gin.Context) {
+	page := pagination.NewFromGinRequest(c, -1)
+	result := p.service.GetAll(c.Request.Context(), page)
+	if result == nil {
+		c.JSON(http.StatusInternalServerError,"No products found")
 		return
 	}
 
-	c.JSON(http.StatusNoContent, nil)
+
+	c.JSON(http.StatusOK, page)
+}
+
+func (p *productHandler) searchProduct(c *gin.Context) {
+	page := pagination.NewFromGinRequest(c, -1)
+	//get search keyword from query
+	searchItem := c.Param("sku")
+	result := p.service.SearchProduct(c.Request.Context(), searchItem, page)
+	if result == nil {
+		c.JSON(http.StatusInternalServerError,"No products found")
+		return
+	}
+
+	c.JSON(http.StatusOK, page)
 }

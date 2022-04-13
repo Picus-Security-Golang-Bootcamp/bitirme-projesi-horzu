@@ -13,33 +13,43 @@ type Product struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
-	CategoryId  uint
+	CategoryId  string
 	Name        string
-	Slug        string
 	Description string
+	SKU         string
 	Price       float64
-	Quantity    uint
+	Quantity    int64
 	Rating      int64
-	Weight      float64
 	IsActive    bool
 
-	Category  *category.Category
+	Category *category.Category
 	// ImageFile []*mediaFile.MediaFile
 	// Stock     *stock.Stock
 }
 
 func (u *Product) BeforeCreate(tx *gorm.DB) (err error) {
 	u.Id = uuid.New().String()
+	u.SKU = uuid.New().String()
+	u.IsActive = true
 
 	return nil
 }
 
-func NewProduct(name string, desc string, stockCount uint, price float64, categoryId uint) *Product {
+func NewProduct(name string, desc string, stockCount int64, price float64, categoryId string) *Product {
 	return &Product{
-		Name:       name,
-		IsActive:   true,
-		Quantity:   stockCount,
-		Price:      price,
-		CategoryId: categoryId,
+		Name:        name,
+		Description: desc,
+		Quantity:    stockCount,
+		Price:       price,
+		CategoryId:  categoryId,
 	}
+}
+
+func (p *Product) UpdateProduct(name, sku, description, categoryId string, stockQuantity int64, price float64) {
+	p.Name = name
+	p.SKU = sku
+	p.Quantity = stockQuantity
+	p.Price = price
+	p.Description = description
+	p.CategoryId = categoryId
 }

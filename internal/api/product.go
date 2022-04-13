@@ -19,38 +19,44 @@ import (
 // swagger:model Product
 type Product struct {
 
-	// category
-	Category *Category `json:"category,omitempty"`
-
-	// id
-	ID string `json:"id,omitempty"`
-
-	// image
+	// category Id
 	// Required: true
-	Image *Images `json:"image"`
+	CategoryID *string `json:"categoryId"`
+
+	// desc
+	// Required: true
+	Desc *string `json:"desc"`
+
+	// name
+	// Required: true
+	Name *string `json:"name"`
 
 	// price
 	// Required: true
 	Price *float64 `json:"price"`
 
-	// product name
+	// sku
 	// Required: true
-	ProductName *string `json:"product_name"`
+	Sku *string `json:"sku"`
 
-	// rating
+	// stock count
 	// Required: true
-	Rating *int64 `json:"rating"`
+	StockCount *int64 `json:"stockCount"`
 }
 
 // Validate validates this product
 func (m *Product) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateCategory(formats); err != nil {
+	if err := m.validateCategoryID(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateImage(formats); err != nil {
+	if err := m.validateDesc(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateName(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -58,11 +64,11 @@ func (m *Product) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateProductName(formats); err != nil {
+	if err := m.validateSku(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateRating(formats); err != nil {
+	if err := m.validateStockCount(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -72,40 +78,28 @@ func (m *Product) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Product) validateCategory(formats strfmt.Registry) error {
-	if swag.IsZero(m.Category) { // not required
-		return nil
-	}
+func (m *Product) validateCategoryID(formats strfmt.Registry) error {
 
-	if m.Category != nil {
-		if err := m.Category.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("category")
-			} else if ce, ok := err.(*errors.CompositeError); ok {
-				return ce.ValidateName("category")
-			}
-			return err
-		}
+	if err := validate.Required("categoryId", "body", m.CategoryID); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func (m *Product) validateImage(formats strfmt.Registry) error {
+func (m *Product) validateDesc(formats strfmt.Registry) error {
 
-	if err := validate.Required("image", "body", m.Image); err != nil {
+	if err := validate.Required("desc", "body", m.Desc); err != nil {
 		return err
 	}
 
-	if m.Image != nil {
-		if err := m.Image.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("image")
-			} else if ce, ok := err.(*errors.CompositeError); ok {
-				return ce.ValidateName("image")
-			}
-			return err
-		}
+	return nil
+}
+
+func (m *Product) validateName(formats strfmt.Registry) error {
+
+	if err := validate.Required("name", "body", m.Name); err != nil {
+		return err
 	}
 
 	return nil
@@ -120,71 +114,26 @@ func (m *Product) validatePrice(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Product) validateProductName(formats strfmt.Registry) error {
+func (m *Product) validateSku(formats strfmt.Registry) error {
 
-	if err := validate.Required("product_name", "body", m.ProductName); err != nil {
+	if err := validate.Required("sku", "body", m.Sku); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (m *Product) validateRating(formats strfmt.Registry) error {
+func (m *Product) validateStockCount(formats strfmt.Registry) error {
 
-	if err := validate.Required("rating", "body", m.Rating); err != nil {
+	if err := validate.Required("stockCount", "body", m.StockCount); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-// ContextValidate validate this product based on the context it is used
+// ContextValidate validates this product based on context it is used
 func (m *Product) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.contextValidateCategory(ctx, formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.contextValidateImage(ctx, formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *Product) contextValidateCategory(ctx context.Context, formats strfmt.Registry) error {
-
-	if m.Category != nil {
-		if err := m.Category.ContextValidate(ctx, formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("category")
-			} else if ce, ok := err.(*errors.CompositeError); ok {
-				return ce.ValidateName("category")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *Product) contextValidateImage(ctx context.Context, formats strfmt.Registry) error {
-
-	if m.Image != nil {
-		if err := m.Image.ContextValidate(ctx, formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("image")
-			} else if ce, ok := err.(*errors.CompositeError); ok {
-				return ce.ValidateName("image")
-			}
-			return err
-		}
-	}
-
 	return nil
 }
 

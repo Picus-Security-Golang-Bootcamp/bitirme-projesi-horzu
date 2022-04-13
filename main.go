@@ -83,7 +83,8 @@ func main() {
 	// Product Repository
 	productRepo := product.NewProductRepository(DB)
 	productRepo.Migration()
-	product.NewProductHandler(productRouter, productRepo)
+	productService := product.NewProductService(productRepo)
+	product.NewProductHandler(productRouter, cfg, productService)
 
 	// Cart Repository
 	// cartRepo := cart.NewCartRepository(DB)
