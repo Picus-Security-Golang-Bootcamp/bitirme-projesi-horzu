@@ -7,12 +7,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/horzu/golang/cart-api/internal/domain/cart"
 	"github.com/horzu/golang/cart-api/internal/domain/category"
-	"github.com/horzu/golang/cart-api/internal/domain/order"
 	"github.com/horzu/golang/cart-api/internal/domain/product"
-	"github.com/horzu/golang/cart-api/internal/domain/role"
-	"github.com/horzu/golang/cart-api/internal/domain/user"
+	"github.com/horzu/golang/cart-api/internal/domain/users"
+	"github.com/horzu/golang/cart-api/internal/domain/users/role"
 	"github.com/horzu/golang/cart-api/pkg/config"
 	db "github.com/horzu/golang/cart-api/pkg/database"
 	"github.com/horzu/golang/cart-api/pkg/graceful"
@@ -54,7 +52,7 @@ func main() {
 	}))
 
 	srv := &http.Server{
-		Addr:         fmt.Sprintf(":%d", cfg.ServerConfig.Port),
+		Addr:         fmt.Sprintf("127.0.0.1:%d", cfg.ServerConfig.Port),
 		Handler:      r,
 		ReadTimeout:  time.Duration(cfg.ServerConfig.ReadTimeoutSecs * int(time.Second)),
 		WriteTimeout: time.Duration(cfg.ServerConfig.WriteTimeoutSecs * int(time.Second)),
@@ -62,25 +60,25 @@ func main() {
 
 	rootRouter := r.Group(cfg.ServerConfig.RouterPrefix)
 
-	orderRouter := rootRouter.Group("/orders")
+	// orderRouter := rootRouter.Group("/orders")
 	productRouter := rootRouter.Group("/products")
 	authRouter := rootRouter.Group("/user")
 	categoryRouter := rootRouter.Group("/category")
-	cartRouter := rootRouter.Group("/cart")
+	// cartRouter := rootRouter.Group("/cart")
 
 	// Role Repository
 	roleRepo := role.NewRoleRepository(DB)
 	roleRepo.Migration()
 	roleRepo.InserSampleData()
 	// User Repository
-	userRepo := user.NewUserRepository(DB)
+	userRepo := users.NewUserRepository(DB)
 	userRepo.Migration()
-	user.NewAuthHandler(authRouter, cfg, userRepo)
+	users.NewAuthHandler(authRouter, cfg, userRepo)
 
 	// Order Repository
-	orderRepo := order.NewOrderRepository(DB)
-	orderRepo.Migration()
-	order.NewOrderHandler(orderRouter, orderRepo)
+	// orderRepo := order.NewOrderRepository(DB)
+	// orderRepo.Migration()
+	// order.NewOrderHandler(orderRouter, orderRepo)
 
 	// Product Repository
 	productRepo := product.NewProductRepository(DB)
@@ -88,14 +86,15 @@ func main() {
 	product.NewProductHandler(productRouter, productRepo)
 
 	// Cart Repository
-	cartRepo := cart.NewCartRepository(DB)
-	cartRepo.Migration()
-	cart.NewCartHandler(cartRouter, cartRepo)
+	// cartRepo := cart.NewCartRepository(DB)
+	// cartRepo.Migration()
+	// cart.NewCartHandler(cartRouter, cartRepo)
 
 	// Category Repository
 	categoryRepo := category.NewCategoryRepository(DB)
 	categoryRepo.Migration()
-	category.NewCategoryHandler(categoryRouter, cfg, categoryRepo)
+	categoryService := category.NewCategoryService(categoryRepo)
+	category.NewCategoryHandler(categoryRouter, cfg, categoryService)
 
 	go func() {
 		if err := srv.ListenAndServe(); err != http.ErrServerClosed {

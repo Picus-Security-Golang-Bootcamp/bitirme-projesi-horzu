@@ -1,4 +1,4 @@
-package user
+package users
 
 import (
 	"html"
@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/horzu/golang/cart-api/internal/domain/role"
+	"github.com/horzu/golang/cart-api/internal/domain/users/role"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -16,9 +16,9 @@ type User struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
-	Email     string `gorm:"size:255;not null;unique" json:"email"`
-	Password  string `gorm:"size:255;not null;" json:"password"`
-	RoleId    int64 `gorm:"not null; default:0" json:"role_id"`
+	Email     string         `gorm:"size:255;not null;unique" json:"email"`
+	Password  string         `gorm:"size:255;not null;" json:"password"`
+	RoleId    int64          `gorm:"not null; default:2" json:"role_id"`
 	Role      role.Role
 }
 

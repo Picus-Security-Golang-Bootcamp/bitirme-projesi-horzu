@@ -7,7 +7,7 @@ import (
 func categoryToResponse(c Category) *api.Category{
 	return &api.Category{
 		Name: &c.Name,
-		Slug: c.Slug,
+		Description: c.Description,
 	}
 }
 
@@ -24,6 +24,6 @@ func responseToCategory(a *api.Category) *Category {
 	return &Category{
 		Id: a.ID,
 		Name: *a.Name,
-		Slug:         *&a.Slug,
+		Description:         *&a.Description,
 	}
 }

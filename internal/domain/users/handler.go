@@ -1,4 +1,4 @@
-package user
+package users
 
 import (
 	"net/http"
@@ -21,7 +21,7 @@ type authHandler struct {
 
 func NewAuthHandler(r *gin.RouterGroup, cfg *config.Config, repo *UserRepository) {
 	a := authHandler{cfg: cfg,
-	repo: repo}
+		repo: repo}
 
 	r.POST("/login", a.login)
 	r.POST("/signup", a.Signup)
@@ -30,22 +30,22 @@ func NewAuthHandler(r *gin.RouterGroup, cfg *config.Config, repo *UserRepository
 	r.POST("/decode", a.VerifyToken)
 }
 
-type tokenStruct struct{
-	token string
+type tokenStruct struct {
+	token        string
 	refreshToken string
 }
 
-func (a *authHandler) Signup(c *gin.Context){
+func (a *authHandler) Signup(c *gin.Context) {
 	user := User{}
 
-	if err:= c.Bind(&user);err !=nil{
+	if err := c.Bind(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	_, err := a.repo.SaveUser(&user)
 
-	if err!=nil{
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "This email is already registered."})
 		return
 	}
@@ -60,11 +60,7 @@ func (a *authHandler) login(c *gin.Context) {
 		return
 	}
 
-	u := User{}
-	u.Email = *req.Email
-	u.Password = *req.Password
-
-	user, err := a.repo.LoginCheck(u.Email, u.Password)
+	user, err := a.repo.LoginCheck(*req.Email, *req.Password)
 	if err != nil {
 		c.JSON(httpErrors.ErrorResponse(err))
 		return
@@ -74,23 +70,24 @@ func (a *authHandler) login(c *gin.Context) {
 	}
 
 	jwtClaimsForToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"role": user.Role.Role,
+		"id":    user.Id,
+		"role":  user.Role.Role,
 		"email": user.Email,
 		"iat":   time.Now().Unix(),
 		"exp":   time.Now().Add(time.Duration(a.cfg.JWTConfig.SessionTime) * time.Second).Unix(),
 	})
 	jwtClaimsForRefreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"role": user.Role.Role,
+		"role":  user.Role.Role,
 		"email": user.Email,
 		"iat":   time.Now().Unix(),
-		"exp":   time.Now().Add(time.Duration(a.cfg.JWTConfig.SessionTime) * time.Second).Unix(),
+		"exp":   time.Now().Add(time.Duration(a.cfg.JWTConfig.SessionTime*168) * time.Second).Unix(),
 	})
 
 	token := jwtHelper.GenerateToken(jwtClaimsForToken, a.cfg.JWTConfig.SecretKey)
 	refreshToken := jwtHelper.GenerateToken(jwtClaimsForRefreshToken, a.cfg.JWTConfig.SecretKey)
 
-	tokens:= &tokenStruct{
-		token: token,
+	tokens := &tokenStruct{
+		token:        token,
 		refreshToken: refreshToken,
 	}
 

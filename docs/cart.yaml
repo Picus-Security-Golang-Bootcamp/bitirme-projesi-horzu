@@ -220,7 +220,7 @@ definitions:
         type: "string"
       name:
         type: "string"
-      slug:
+      description:
         type: "string"
   Images:
     type: "object"

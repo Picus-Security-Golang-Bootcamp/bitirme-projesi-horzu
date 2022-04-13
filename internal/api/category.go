@@ -19,15 +19,15 @@ import (
 // swagger:model Category
 type Category struct {
 
+	// description
+	Description string `json:"description,omitempty"`
+
 	// id
 	ID string `json:"id,omitempty"`
 
 	// name
 	// Required: true
 	Name *string `json:"name"`
-
-	// slug
-	Slug string `json:"slug,omitempty"`
 }
 
 // Validate validates this category

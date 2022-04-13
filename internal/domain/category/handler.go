@@ -1,24 +1,23 @@
 package category
 
 import (
-	"encoding/csv"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/horzu/golang/cart-api/internal/api"
 	"github.com/horzu/golang/cart-api/internal/httpErrors"
 	"github.com/horzu/golang/cart-api/pkg/config"
 	mw "github.com/horzu/golang/cart-api/pkg/middleware"
+	"github.com/horzu/golang/cart-api/pkg/pagination"
 )
 
 type categoryHandler struct {
-	cfg  *config.Config
-	repo *CategoryRepository
+	cfg     *config.Config
+	service Service
 }
 
-func NewCategoryHandler(r *gin.RouterGroup, cfg *config.Config, repo *CategoryRepository) {
-	h := &categoryHandler{repo: repo,
-		cfg: cfg,}
+func NewCategoryHandler(r *gin.RouterGroup, cfg *config.Config, service Service) {
+	h := &categoryHandler{service: service,
+		cfg: cfg}
 	r.Use(mw.AdminAuthMiddleware(cfg.JWTConfig.SecretKey))
 	r.POST("/createbulkcategory", h.createBulk)
 	r.GET("/listcategory", h.listAllCategories)
@@ -26,37 +25,27 @@ func NewCategoryHandler(r *gin.RouterGroup, cfg *config.Config, repo *CategoryRe
 }
 
 func (p *categoryHandler) createBulk(c *gin.Context) {
-	categoryBody := &api.Category{}
-
 	file, err := c.FormFile("file")
-	filedata, _ := file.Open()
-	defer filedata.Close()
-
-
-	csvLines, err := csv.NewReader(filedata).ReadAll()
-	
-	if err != nil {
+	if err!=nil{
 		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"status": http.StatusUnprocessableEntity,
-			"error":  err,
+			"status": "Error!!!",
 		})
+		return 
 	}
+	p.service.CreateBulk(c.Request.Context(), file)
 
-	// Serializer yapılacak!! responseToCategory
-	for _, record := range csvLines[1:] {
-		categoryBody.Name = &record[0]
-		p.repo.create(responseToCategory(categoryBody))
-
-	}
+	c.JSON(http.StatusUnprocessableEntity, gin.H{
+		"status": "Cretead!!",
+	})
 }
 
 func (p *categoryHandler) listAllCategories(c *gin.Context) {
-	categories, err := p.repo.getAll()
+	page := pagination.NewFromGinRequest(c, -1)
+	categories, err := p.service.ListAll(c.Request.Context(), page)
 	if err != nil {
 		c.JSON(httpErrors.ErrorResponse(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, categoriesToResponse(categories))
+	c.JSON(http.StatusOK, categoriesToResponse(&categories))
 }
-
