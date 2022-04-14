@@ -94,7 +94,7 @@ func (p *ProductRepository) GetBySku(ctx context.Context, sku string) (*Product,
 	zap.L().Debug("product.repo.GetBySku", zap.Reflect("sku", sku))
 
 	var product *Product
-	if result := p.db.First(&product, "sku",sku); result.Error != nil {
+	if result := p.db.Where("sku = ?", sku).First(&product); result.Error != nil {
 		return nil, result.Error
 	}
 	return product, nil

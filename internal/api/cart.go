@@ -7,7 +7,6 @@ package api
 
 import (
 	"context"
-	"strconv"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
@@ -20,35 +19,16 @@ import (
 // swagger:model Cart
 type Cart struct {
 
-	// id
-	ID string `json:"id,omitempty"`
-
-	// items
+	// user Id
 	// Required: true
-	Items []*CartItem `json:"items"`
-
-	// total price
-	// Required: true
-	TotalPrice *float64 `json:"total_price"`
-
-	// user
-	// Required: true
-	User *User `json:"user"`
+	UserID *string `json:"userId"`
 }
 
 // Validate validates this cart
 func (m *Cart) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateItems(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateTotalPrice(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateUser(formats); err != nil {
+	if err := m.validateUserID(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -58,113 +38,17 @@ func (m *Cart) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *Cart) validateItems(formats strfmt.Registry) error {
+func (m *Cart) validateUserID(formats strfmt.Registry) error {
 
-	if err := validate.Required("items", "body", m.Items); err != nil {
-		return err
-	}
-
-	for i := 0; i < len(m.Items); i++ {
-		if swag.IsZero(m.Items[i]) { // not required
-			continue
-		}
-
-		if m.Items[i] != nil {
-			if err := m.Items[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("items" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
-					return ce.ValidateName("items" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
-	}
-
-	return nil
-}
-
-func (m *Cart) validateTotalPrice(formats strfmt.Registry) error {
-
-	if err := validate.Required("total_price", "body", m.TotalPrice); err != nil {
+	if err := validate.Required("userId", "body", m.UserID); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (m *Cart) validateUser(formats strfmt.Registry) error {
-
-	if err := validate.Required("user", "body", m.User); err != nil {
-		return err
-	}
-
-	if m.User != nil {
-		if err := m.User.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("user")
-			} else if ce, ok := err.(*errors.CompositeError); ok {
-				return ce.ValidateName("user")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-// ContextValidate validate this cart based on the context it is used
+// ContextValidate validates this cart based on context it is used
 func (m *Cart) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.contextValidateItems(ctx, formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.contextValidateUser(ctx, formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *Cart) contextValidateItems(ctx context.Context, formats strfmt.Registry) error {
-
-	for i := 0; i < len(m.Items); i++ {
-
-		if m.Items[i] != nil {
-			if err := m.Items[i].ContextValidate(ctx, formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("items" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
-					return ce.ValidateName("items" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
-	}
-
-	return nil
-}
-
-func (m *Cart) contextValidateUser(ctx context.Context, formats strfmt.Registry) error {
-
-	if m.User != nil {
-		if err := m.User.ContextValidate(ctx, formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("user")
-			} else if ce, ok := err.(*errors.CompositeError); ok {
-				return ce.ValidateName("user")
-			}
-			return err
-		}
-	}
-
 	return nil
 }
 

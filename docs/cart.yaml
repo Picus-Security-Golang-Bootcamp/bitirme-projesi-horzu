@@ -178,39 +178,28 @@ definitions:
   Cart:
     type: "object"
     required:
-      - "items"
-      - "user"
-      - "total_price"
+      - "userId"
     properties:
-      id:
+      userId:
         type: "string"
-      items:
-        type: "array"
-        items:
-          $ref: "#/definitions/CartItem"
-      total_price:
-        type: "number"
-        format: "float64"
-      user:
-        type: "object"
-        $ref: "#/definitions/User"
   CartItem:
     type: "object"
     required:
-      - "items"
+      - "cartId"
       - "price"
+      - "quantity"
+      - "sku"
     properties:
-      id:
+      cartId:
         type: "string"
       price:
         type: "number"
         format: "float64"
       quantity:
-        type: "number"
-        format: "float64"
-      items:
-        type: "object"
-        $ref: "#/definitions/Product"
+        type: "integer"
+        format: "int64"
+      sku:
+        type: "string"
   Category:
     type: "object"
     required:
