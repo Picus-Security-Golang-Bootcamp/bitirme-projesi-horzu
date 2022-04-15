@@ -21,7 +21,7 @@ var (
 	UniqueError         = errors.New("Item should be unique on database")
 )
 
-type RestError api.APIResponse
+type RestError api.SuccessfulAPIResponse
 
 type RestErr interface {
 	Status() int
@@ -31,7 +31,7 @@ type RestErr interface {
 
 // Error  Error() interface method
 func (e RestError) Error() string {
-	return fmt.Sprintf("status: %d - errors: %s - causes: %v", e.Code, e.Message, e.Details)
+	return fmt.Sprintf("status: %d - errors: %s - causes: %v", e.Code, e.Message, e.Data)
 }
 
 func (e RestError) Status() int {
@@ -39,14 +39,14 @@ func (e RestError) Status() int {
 }
 
 func (e RestError) Causes() interface{} {
-	return e.Details
+	return e.Data
 }
 
 func NewRestError(status int, err string, causes interface{}) RestErr {
 	return RestError{
 		Code:    int64(status),
 		Message: err,
-		Details: causes,
+		Data:    causes,
 	}
 }
 
@@ -54,7 +54,7 @@ func NewInternalServerError(causes interface{}) RestErr {
 	result := RestError{
 		Code:    http.StatusInternalServerError,
 		Message: InternalServerError.Error(),
-		Details: causes,
+		Data: causes,
 	}
 	return result
 }

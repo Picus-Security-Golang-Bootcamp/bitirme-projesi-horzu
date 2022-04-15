@@ -10,7 +10,7 @@ func productToResponse(p *Product) api.Product {
 		Name:       &p.Name,
 		Desc:       &p.Description,
 		Price:      &p.Price,
-		StockCount: &p.Quantity,
+		StockCount: &p.Stock,
 		CategoryID: &p.CategoryId,
 	}
 }
@@ -21,7 +21,7 @@ func responseToProduct(a *api.Product) *Product {
 		Name:        *a.Name,
 		Description: *a.Desc,
 		Price:       *a.Price,
-		Quantity:    *a.StockCount,
+		Stock:    *a.StockCount,
 		CategoryId:  *a.CategoryID,
 	}
 }

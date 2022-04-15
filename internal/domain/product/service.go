@@ -57,7 +57,7 @@ func (c *ProductService) UpdateProduct(ctx context.Context, product *Product) er
 	if err!=nil{
 		return errors.New("record not found")
 	}
-	changedProduct.UpdateProduct(product.Name, product.SKU, product.Description, product.CategoryId, product.Quantity, product.Price)
+	changedProduct.UpdateProduct(product.Name, product.SKU, product.Description, product.CategoryId, product.Stock, product.Price)
 
 	_, err = c.repo.Update(ctx, changedProduct)
 

@@ -54,7 +54,7 @@ func (a *authHandler) Signup(c *gin.Context) {
 }
 
 func (a *authHandler) login(c *gin.Context) {
-	var req api.Login
+	var req api.UserCreateUserRequest
 	if err := c.Bind(&req); err != nil {
 		c.JSON(httpErr.ErrorResponse(httpErr.NewRestError(http.StatusBadRequest, "Check your request body", nil)))
 		return

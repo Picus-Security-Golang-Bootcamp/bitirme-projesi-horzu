@@ -11,48 +11,40 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
-	"github.com/go-openapi/validate"
 )
 
 // CartItem cart item
 //
-// swagger:model CartItem
+// swagger:model cart.Item
 type CartItem struct {
 
-	// cart Id
-	// Required: true
-	CartID *string `json:"cartId"`
+	// ID
+	ID int64 `json:"ID,omitempty"`
 
-	// price
-	// Required: true
-	Price *float64 `json:"price"`
+	// cart ID
+	CartID string `json:"cartID,omitempty"`
+
+	// created at
+	CreatedAt string `json:"createdAt,omitempty"`
+
+	// product
+	Product *ProductGetProductResponse `json:"product,omitempty"`
+
+	// product ID
+	ProductID int64 `json:"productID,omitempty"`
 
 	// quantity
-	// Required: true
-	Quantity *int64 `json:"quantity"`
+	Quantity int64 `json:"quantity,omitempty"`
 
-	// sku
-	// Required: true
-	Sku *string `json:"sku"`
+	// updated at
+	UpdatedAt string `json:"updatedAt,omitempty"`
 }
 
 // Validate validates this cart item
 func (m *CartItem) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateCartID(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validatePrice(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateQuantity(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateSku(formats); err != nil {
+	if err := m.validateProduct(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -62,44 +54,52 @@ func (m *CartItem) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *CartItem) validateCartID(formats strfmt.Registry) error {
+func (m *CartItem) validateProduct(formats strfmt.Registry) error {
+	if swag.IsZero(m.Product) { // not required
+		return nil
+	}
 
-	if err := validate.Required("cartId", "body", m.CartID); err != nil {
-		return err
+	if m.Product != nil {
+		if err := m.Product.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("product")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("product")
+			}
+			return err
+		}
 	}
 
 	return nil
 }
 
-func (m *CartItem) validatePrice(formats strfmt.Registry) error {
-
-	if err := validate.Required("price", "body", m.Price); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *CartItem) validateQuantity(formats strfmt.Registry) error {
-
-	if err := validate.Required("quantity", "body", m.Quantity); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *CartItem) validateSku(formats strfmt.Registry) error {
-
-	if err := validate.Required("sku", "body", m.Sku); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// ContextValidate validates this cart item based on context it is used
+// ContextValidate validate this cart item based on the context it is used
 func (m *CartItem) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateProduct(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *CartItem) contextValidateProduct(ctx context.Context, formats strfmt.Registry) error {
+
+	if m.Product != nil {
+		if err := m.Product.ContextValidate(ctx, formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("product")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("product")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 

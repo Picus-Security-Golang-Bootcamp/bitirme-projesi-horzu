@@ -70,7 +70,7 @@ func (service *CartService) AddItem(ctx context.Context, sku string, cartId stri
 	if err == nil {
 		return "", ErrItemAlreadyInCart
 	}
-	if addedProduct.Quantity < orderQuantity {
+	if addedProduct.Stock < orderQuantity {
 		return "", product.ErrProductInsufficientStock
 	}
 	if orderQuantity < 0 {

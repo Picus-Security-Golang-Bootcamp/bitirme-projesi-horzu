@@ -19,8 +19,7 @@ type Product struct {
 	Description string
 	SKU         string
 	Price       float64
-	Quantity    int64
-	Rating      int64
+	Stock    int64
 	IsActive    bool
 
 	Category *category.Category
@@ -40,7 +39,7 @@ func NewProduct(name string, desc string, stockCount int64, price float64, categ
 	return &Product{
 		Name:        name,
 		Description: desc,
-		Quantity:    stockCount,
+		Stock:    stockCount,
 		Price:       price,
 		CategoryId:  categoryId,
 	}
@@ -49,7 +48,7 @@ func NewProduct(name string, desc string, stockCount int64, price float64, categ
 func (p *Product) UpdateProduct(name, sku, description, categoryId string, stockQuantity int64, price float64) {
 	p.Name = name
 	p.SKU = sku
-	p.Quantity = stockQuantity
+	p.Stock = stockQuantity
 	p.Price = price
 	p.Description = description
 	p.CategoryId = categoryId
@@ -59,12 +58,12 @@ func (p *Product) UpdateQuantity(changeAmount int64) error {
 	if err != nil {
 		return err
 	}
-	p.Quantity += changeAmount
+	p.Stock += changeAmount
 	return nil
 }
 
 func (p *Product) CheckStockExist(changeAmount int64) error {
-	if p.Quantity + changeAmount < 0 {
+	if p.Stock + changeAmount < 0 {
 		return errors.New("ErrProductStockIsNotEnough")
 	}
 	return nil
