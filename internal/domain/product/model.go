@@ -1,6 +1,7 @@
 package product
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -52,4 +53,19 @@ func (p *Product) UpdateProduct(name, sku, description, categoryId string, stock
 	p.Price = price
 	p.Description = description
 	p.CategoryId = categoryId
+}
+func (p *Product) UpdateQuantity(changeAmount int64) error {
+	err := p.CheckStockExist(changeAmount)
+	if err != nil {
+		return err
+	}
+	p.Quantity += changeAmount
+	return nil
+}
+
+func (p *Product) CheckStockExist(changeAmount int64) error {
+	if p.Quantity + changeAmount < 0 {
+		return errors.New("ErrProductStockIsNotEnough")
+	}
+	return nil
 }

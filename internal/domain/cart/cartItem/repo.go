@@ -65,10 +65,10 @@ func (c *CartItemRepository) DeleteById(ctx context.Context, id string) error {
 }
 
 // FindByID returns Item with given productId and cartId
-func (c *CartItemRepository) FindByID(ctx context.Context, cartId string, itemId string) (*CartItem, error) {
+func (c *CartItemRepository) FindByID(ctx context.Context, cartId string, productId string) (*CartItem, error) {
 	var item *CartItem
 
-	err := c.db.Where(&CartItem{Id: itemId, CartId: cartId}).First(&item).Error
+	err := c.db.Where(&CartItem{ProductId: productId, CartId: cartId}).First(&item).Error
 	fmt.Println(&item, err)
 	if err != nil {
 		return nil, errors.New("cart item not found")

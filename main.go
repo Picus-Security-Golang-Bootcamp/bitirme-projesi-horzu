@@ -10,6 +10,8 @@ import (
 	"github.com/horzu/golang/cart-api/internal/domain/cart"
 	"github.com/horzu/golang/cart-api/internal/domain/cart/cartItem"
 	"github.com/horzu/golang/cart-api/internal/domain/category"
+	"github.com/horzu/golang/cart-api/internal/domain/order"
+	"github.com/horzu/golang/cart-api/internal/domain/order/orderItem"
 	"github.com/horzu/golang/cart-api/internal/domain/product"
 	"github.com/horzu/golang/cart-api/internal/domain/users"
 	"github.com/horzu/golang/cart-api/internal/domain/users/role"
@@ -62,11 +64,11 @@ func main() {
 
 	rootRouter := r.Group(cfg.ServerConfig.RouterPrefix)
 
-	// orderRouter := rootRouter.Group("/orders")
-	productRouter := rootRouter.Group("/products")
 	authRouter := rootRouter.Group("/user")
 	categoryRouter := rootRouter.Group("/category")
+	productRouter := rootRouter.Group("/products")
 	cartRouter := rootRouter.Group("/cart")
+	orderRouter := rootRouter.Group("/orders")
 
 	// Role Repository
 	roleRepo := role.NewRoleRepository(DB)
@@ -77,10 +79,11 @@ func main() {
 	userRepo.Migration()
 	users.NewAuthHandler(authRouter, cfg, userRepo)
 
-	// Order Repository
-	// orderRepo := order.NewOrderRepository(DB)
-	// orderRepo.Migration()
-	// order.NewOrderHandler(orderRouter, orderRepo)
+	// Category Repository
+	categoryRepo := category.NewCategoryRepository(DB)
+	categoryRepo.Migration()
+	categoryService := category.NewCategoryService(categoryRepo)
+	category.NewCategoryHandler(categoryRouter, cfg, categoryService)
 
 	// Product Repository
 	productRepo := product.NewProductRepository(DB)
@@ -96,11 +99,15 @@ func main() {
 	cartService := cart.NewCartService(cartRepo, productRepo, cartItemRepo)
 	cart.NewCartHandler(cartRouter, cfg, cartService)
 
-	// Category Repository
-	categoryRepo := category.NewCategoryRepository(DB)
+	// OrderItem Repository
+	orderItemRepo := orderItem.NewOrderItemRepository(DB)
 	categoryRepo.Migration()
-	categoryService := category.NewCategoryService(categoryRepo)
-	category.NewCategoryHandler(categoryRouter, cfg, categoryService)
+
+	// Order Repository
+	orderRepo := order.NewOrderRepository(DB)
+	orderRepo.Migration()
+	orderService := order.NewOrderService(orderRepo, orderItemRepo, cartService, productService)
+	order.NewOrderHandler(orderRouter, cfg, orderService)
 
 	go func() {
 		if err := srv.ListenAndServe(); err != http.ErrServerClosed {

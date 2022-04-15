@@ -21,6 +21,8 @@ type Service interface {
 	UpdateItem(ctx context.Context, id string, cartId string, updateQuantity uint) error
 	GetCartItems(ctx context.Context, cartId string) ([]*cartItem.CartItem, error)
 	DeleteItem(ctx context.Context, basketId, itemId string) error
+	FetchCartByUserId(ctx context.Context,UserID string) (Cart, error)
+	ClearBasket(ctx context.Context,cart *Cart) 
 }
 
 func NewCartService(r Repository, productRepository product.Repository, cartItemRepository cartItem.Repository) *CartService {
@@ -118,4 +120,22 @@ func (service *CartService) GetCartItems(ctx context.Context, cartId string) ([]
 	}
 
 	return items, nil
+}
+
+//FetchCartByUserId it returns cart model for complete
+func (service *CartService) FetchCartByUserId(ctx context.Context ,UserID string) (Cart, error) {
+	cart, err := service.cartRepo.FindByUserId(ctx, UserID)
+
+	if err != nil {
+		return Cart{}, err
+	}
+
+	return cart, nil
+
+}
+
+func (service *CartService) ClearBasket(ctx context.Context,cart *Cart) {
+	for _, item := range *cart.Items {
+		service.cartItemRepo.DeleteById(ctx,item.Id)
+	}
 }

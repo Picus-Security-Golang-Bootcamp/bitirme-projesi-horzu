@@ -20,12 +20,12 @@ type productHandler struct {
 
 func NewProductHandler(r *gin.RouterGroup, cfg *config.Config, service Service) {
 	h := &productHandler{service: service, cfg: cfg}
-	r.Use(mw.AdminAuthMiddleware(cfg.JWTConfig.SecretKey))
 
-	r.POST("/create", h.create)
-	r.PUT("/:sku", h.update)
-	r.DELETE("/:sku", h.delete)
-	r.GET("/list", h.listProduct)
+
+	r.POST("/create", h.create).Use(mw.AdminAuthMiddleware(cfg.JWTConfig.SecretKey))
+	r.PUT("/:sku", h.update).Use(mw.AdminAuthMiddleware(cfg.JWTConfig.SecretKey))
+	r.DELETE("/:sku", h.delete).Use(mw.AdminAuthMiddleware(cfg.JWTConfig.SecretKey))
+	r.GET("/", h.listProduct)
 	r.GET("/search/:sku", h.searchProduct)
 }
 

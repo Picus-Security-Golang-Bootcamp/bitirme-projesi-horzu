@@ -16,6 +16,7 @@ type Repository interface {
 	GetByID(ctx context.Context, id string) (*Product, error)
 	GetBySku(ctx context.Context, sku string) (*Product, error)
 	SearchByNameOrSku(ctx context.Context, str string, page *pagination.Pages) ([]*Product, int, error)
+
 }
 
 type ProductRepository struct {
@@ -111,3 +112,4 @@ func (r *ProductRepository) SearchByNameOrSku(ctx context.Context, str string, p
 
 	return products, int(count), nil
 }
+

@@ -19,8 +19,8 @@ func NewCategoryHandler(r *gin.RouterGroup, cfg *config.Config, service Service)
 	h := &categoryHandler{service: service,
 		cfg: cfg}
 	r.Use(mw.AdminAuthMiddleware(cfg.JWTConfig.SecretKey))
-	r.POST("/createbulkcategory", h.createBulk)
-	r.GET("/listcategory", h.listAllCategories)
+	r.POST("/create", h.createBulk)
+	r.GET("/", h.listAllCategories)
 
 }
 

@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/horzu/golang/cart-api/pkg/pagination"
+	"gorm.io/gorm"
 )
 
 type ProductService struct {
@@ -17,9 +18,10 @@ type Service interface {
 	DeleteProduct(ctx context.Context, sku string) error
 	UpdateProduct(ctx context.Context, product *Product) error
 	SearchProduct(ctx context.Context, text string, page *pagination.Pages) *pagination.Pages
+	UpdateProductQuantityForOrder(ctx context.Context,itemList []Product, amount []int64) error 
 }
 
-func NewProductService(repo Repository) Service {
+func NewProductService(repo *ProductRepository) Service {
 	if repo == nil{
 		return nil
 	}
@@ -71,4 +73,26 @@ func (c *ProductService) SearchProduct(ctx context.Context, text string, page *p
 	page.Items = products
 	page.TotalCount = count
 	return page
+}
+
+func (c *ProductService) UpdateProductQuantityForOrder(ctx context.Context,itemList []Product, amount []int64) error {
+
+	for index, item := range itemList {
+		product, err := c.repo.GetBySku(ctx, item.SKU)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
+		err1 := product.UpdateQuantity(amount[index])
+		if err1 != nil {
+			return err1
+		}
+	}
+
+	for index, item := range itemList {
+		product, _ := c.repo.GetBySku(ctx, item.SKU)
+		product.UpdateQuantity(amount[index])
+		c.repo.Update(ctx, product)
+	}
+
+	return nil
 }
