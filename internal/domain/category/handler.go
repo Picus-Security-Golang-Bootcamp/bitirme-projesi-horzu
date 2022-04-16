@@ -26,26 +26,41 @@ func NewCategoryHandler(r *gin.RouterGroup, cfg *config.Config, service Service)
 
 func (p *categoryHandler) createBulk(c *gin.Context) {
 	file, err := c.FormFile("file")
-	if err!=nil{
+	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"status": "Error!!!",
+			"status": "Error reading file",
 		})
-		return 
+		return
 	}
-	p.service.CreateBulk(c.Request.Context(), file)
+	
+	_, err = p.service.CreateBulk(c.Request.Context(), file)
 
-	c.JSON(http.StatusUnprocessableEntity, gin.H{
-		"status": "Cretead!!",
-	})
-}
-
-func (p *categoryHandler) listAllCategories(c *gin.Context) {
-	page := pagination.NewFromGinRequest(c, -1)
-	categories, err := p.service.ListAll(c.Request.Context(), page)
 	if err != nil {
 		c.JSON(httpErrors.ErrorResponse(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, categoriesToResponse(&categories))
+	if err != nil {
+		c.JSON(httpErrors.ErrorResponse(err))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "records created!",
+	})
+}
+
+func (p *categoryHandler) listAllCategories(c *gin.Context) {
+	page, pageSize := pagination.GetPaginationParametersFromRequest(c)
+	categories, count, err := p.service.ListAll(c.Request.Context(), page, pageSize)
+
+	if err != nil {
+		c.JSON(httpErrors.ErrorResponse(err))
+		return
+	}
+
+	result := pagination.NewPaginatedResponse(c, int(count))
+	result.Items = categories
+
+	c.JSON(http.StatusOK, result)
 }

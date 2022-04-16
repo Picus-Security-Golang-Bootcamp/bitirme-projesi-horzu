@@ -54,6 +54,12 @@ func New(page, pageSize, total int) *Pages {
 	}
 }
 
+func NewPaginatedResponse(g *gin.Context, count int) *Pages {
+	page := parseInt(g.Query(PageVar), 1)
+	pageSize := parseInt(g.Query(PageSizeVar), DefaultPageSize)
+	return New(page, pageSize, count)
+}
+
 // NewFromRequest creates a Pages object using the query parameters found in the given HTTP request.
 // count stands for the total number of items. Use -1 if this is unknown.
 func NewFromRequest(req *http.Request, count int) *Pages {

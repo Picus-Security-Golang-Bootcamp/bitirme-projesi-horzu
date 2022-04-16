@@ -2,11 +2,9 @@ package category
 
 import (
 	"context"
-	"errors"
 	"mime/multipart"
 
 	csvHelper "github.com/horzu/golang/cart-api/pkg/csv"
-	"github.com/horzu/golang/cart-api/pkg/pagination"
 )
 
 type categoryService struct {
@@ -14,8 +12,7 @@ type categoryService struct {
 }
 
 type Service interface {
-	ListAll(ctx context.Context, page *pagination.Pages) ([]Category, error)
-	Create(ctx context.Context, category *Category) error
+	ListAll(ctx context.Context, page int, pageSize int) ([]Category,int64, error)
 	CreateBulk(ctx context.Context, fileHeader *multipart.FileHeader) (int, error)
 }
 
@@ -25,20 +22,6 @@ func NewCategoryService(repo *categoryRepository) Service {
 	}
 
 	return &categoryService{repo: repo}
-}
-
-func (s *categoryService) Create(ctx context.Context, category *Category) error {
-	existCity, _ := s.repo.Get(ctx, category.Id)
-	if existCity != nil {
-		return errors.New("It's already exist")
-	}
-
-	err := s.repo.Create(ctx, category)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (s *categoryService) CreateBulk(ctx context.Context, fileHeader *multipart.FileHeader) (int, error) {
@@ -59,12 +42,11 @@ func (s *categoryService) CreateBulk(ctx context.Context, fileHeader *multipart.
 	return count, nil
 }
 
-func (s *categoryService) ListAll(ctx context.Context, page *pagination.Pages) ([]Category, error) {
-	var categories []Category
-
-	categories, err := s.repo.ListAll(ctx, page.Page, page.PageSize)
+func (s *categoryService) ListAll(ctx context.Context, page int, pageSize int) ([]Category,int64, error) {
+	categories, count, err := s.repo.ListAll(ctx, page, pageSize)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return categories, nil
+
+	return categories, count, nil
 }
