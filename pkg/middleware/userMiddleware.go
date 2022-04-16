@@ -13,6 +13,7 @@ func UserAuthMiddleware(secretKey string) gin.HandlerFunc {
 			decodedClaims := jwtHelper.VerifyToken(c.GetHeader("Authorization"), secretKey)
 			if decodedClaims != nil {
 				if decodedClaims.Role == "user" || decodedClaims.Role == "admin" {
+					c.Set("userID", decodedClaims.UserId)
 					c.Next()
 					c.Abort()
 					return

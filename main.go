@@ -77,7 +77,8 @@ func main() {
 	// User Repository
 	userRepo := users.NewUserRepository(DB)
 	userRepo.Migration()
-	users.NewAuthHandler(authRouter, cfg, userRepo)
+	userService := users.NewUserService(userRepo)
+	users.NewAuthHandler(authRouter, cfg, userService)
 
 	// Category Repository
 	categoryRepo := category.NewCategoryRepository(DB)

@@ -6,6 +6,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/go-openapi/strfmt"
 	"github.com/horzu/golang/cart-api/internal/api"
 	"github.com/horzu/golang/cart-api/internal/httpErrors"
 	httpErr "github.com/horzu/golang/cart-api/internal/httpErrors"
@@ -15,13 +16,19 @@ import (
 )
 
 type authHandler struct {
-	cfg  *config.Config
-	repo *UserRepository
+	service Service
+	cfg     *config.Config
 }
 
-func NewAuthHandler(r *gin.RouterGroup, cfg *config.Config, repo *UserRepository) {
-	a := authHandler{cfg: cfg,
-		repo: repo}
+type tokenStruct struct {
+	Token        string `json:"token"`
+	RefreshToken string `json:"refreshToken"`
+}
+
+var refreshTokenTime = 24 * 7
+
+func NewAuthHandler(r *gin.RouterGroup, cfg *config.Config, service Service) {
+	a := authHandler{service: service, cfg: cfg}
 
 	r.POST("/login", a.login)
 	r.POST("/signup", a.Signup)
@@ -30,23 +37,23 @@ func NewAuthHandler(r *gin.RouterGroup, cfg *config.Config, repo *UserRepository
 	r.POST("/decode", a.VerifyToken)
 }
 
-type tokenStruct struct {
-	token        string
-	refreshToken string
-}
-
 func (a *authHandler) Signup(c *gin.Context) {
-	user := User{}
+	var user *api.UserCreateUserRequest
 
 	if err := c.Bind(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	_, err := a.repo.SaveUser(&user)
+	if err := user.Validate(strfmt.NewFormats()); err != nil {
+		c.JSON(httpErrors.ErrorResponse(err))
+		return
+	}
+
+	err := a.service.Create(responseToUser(user))
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "This email is already registered."})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "This user is already registered."})
 		return
 	}
 
@@ -54,13 +61,13 @@ func (a *authHandler) Signup(c *gin.Context) {
 }
 
 func (a *authHandler) login(c *gin.Context) {
-	var req api.UserCreateUserRequest
+	var req api.Login
 	if err := c.Bind(&req); err != nil {
 		c.JSON(httpErr.ErrorResponse(httpErr.NewRestError(http.StatusBadRequest, "Check your request body", nil)))
 		return
 	}
 
-	user, err := a.repo.LoginCheck(*req.Email, *req.Password)
+	user, err := a.service.LoginCheck(*req.Email, *req.Password)
 	if err != nil {
 		c.JSON(httpErrors.ErrorResponse(err))
 		return
@@ -70,28 +77,28 @@ func (a *authHandler) login(c *gin.Context) {
 	}
 
 	jwtClaimsForToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":    user.Id,
-		"role":  user.Role.Role,
-		"email": user.Email,
-		"iat":   time.Now().Unix(),
-		"exp":   time.Now().Add(time.Duration(a.cfg.JWTConfig.SessionTime) * time.Second).Unix(),
+		"userID": user.Id,
+		"role":   user.Role.Role,
+		"email":  user.Email,
+		"iat":    time.Now().Unix(),
+		"exp":    time.Now().Add(time.Duration(a.cfg.JWTConfig.SessionTime) * time.Second).Unix(),
 	})
+
 	jwtClaimsForRefreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"role":  user.Role.Role,
-		"email": user.Email,
-		"iat":   time.Now().Unix(),
-		"exp":   time.Now().Add(time.Duration(a.cfg.JWTConfig.SessionTime*168) * time.Second).Unix(),
+		"userID": user.Id,
+		"role":   user.Role.Role,
+		"email":  user.Email,
+		"iat":    time.Now().Unix(),
+		"exp":    time.Now().Add(time.Duration(a.cfg.JWTConfig.SessionTime*refreshTokenTime) * time.Second).Unix(),
 	})
 
 	token := jwtHelper.GenerateToken(jwtClaimsForToken, a.cfg.JWTConfig.SecretKey)
 	refreshToken := jwtHelper.GenerateToken(jwtClaimsForRefreshToken, a.cfg.JWTConfig.SecretKey)
 
-	tokens := &tokenStruct{
-		token:        token,
-		refreshToken: refreshToken,
-	}
-
-	c.JSON(http.StatusOK, &tokens.token)
+	c.JSON(http.StatusOK, tokenStruct{
+		Token:        token,
+		RefreshToken: refreshToken,
+	})
 }
 
 func (a *authHandler) VerifyToken(c *gin.Context) {

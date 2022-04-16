@@ -2,9 +2,15 @@ package users
 
 import (
 	"go.uber.org/zap"
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
+
+type Repository interface {
+	// Get returns the User with the specified User Id.
+	Get(email string) (*User, error)
+	// Create creates a new User in the storage.
+	Create(user *User) (*User, error)
+}
 
 type UserRepository struct {
 	db *gorm.DB
@@ -18,56 +24,23 @@ func (u *UserRepository) Migration() {
 	u.db.AutoMigrate(&User{})
 }
 
-func (u *UserRepository) GetUserList() (*[]User, error) {
-	zap.L().Debug("user.repo.getAll")
+func (u *UserRepository) Create(user *User) (*User, error) {
+	zap.L().Debug("user.repo.create", zap.Reflect("user", user))
 
-	var ul = &[]User{}
-	if err := u.db.Preload("User").Find(&ul).Error; err != nil {
-		zap.L().Error("user.repo.getAll failed to get users", zap.Error(err))
-		return nil, err
-	}
-
-	return ul, nil
-}
-
-func (u *UserRepository) GetUser(email string) (*User, error) {
-	zap.L().Debug("user.repo.getuser", zap.Reflect("email", email))
-
-	var user = &User{}
-	if result := u.db.First(&user, "email = ?", email); result.Error != nil {
-		return nil, result.Error
-	}
-	return user, nil
-}
-
-func (p *UserRepository) LoginCheck(email, password string) (*User, error) {
-	zap.L().Debug("user.repo.LoginCheck", zap.Reflect("email", email))
-
-	var user = &User{}
-	if result := p.db.Preload("Role").First(&user,  "email = ?", email); result.Error != nil {
-		return nil, result.Error
-	}
-
-	err := VerifyPassword(password, user.Password)
-
-	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
-		return nil, err
-	}
-
-	return user, nil
-}
-
-func (u *UserRepository) SaveUser(b *User) (*User, error) {
-	zap.L().Debug("user.repo.create", zap.Reflect("user", b))
-
-	if err := u.db.Preload("Role").Create(b).Error; err != nil {
+	if err := u.db.Preload("Role").Create(user).Error; err != nil {
 		zap.L().Error("user.repo.Create failed to create user", zap.Error(err))
 		return nil, err
 	}
 
-	return b, nil
+	return user, nil
 }
 
-func VerifyPassword(password, hashedPassword string) error {
-	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+func (u *UserRepository) Get(email string) (*User, error) {
+	zap.L().Debug("user.repo.getuser", zap.Reflect("email", email))
+
+	var user = &User{}
+	if result := u.db.Preload("Role").First(&user,  "email = ?", email); result.Error != nil {
+		return nil, result.Error
+	}
+	return user, nil
 }
