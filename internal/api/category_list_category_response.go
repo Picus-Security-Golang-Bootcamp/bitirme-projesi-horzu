@@ -18,10 +18,10 @@ import (
 type CategoryListCategoryResponse struct {
 
 	// description
-	Description int64 `json:"description,omitempty"`
+	Description string `json:"description,omitempty"`
 
 	// name
-	Name int64 `json:"name,omitempty"`
+	Name string `json:"name,omitempty"`
 }
 
 // Validate validates this category list category response

@@ -134,6 +134,8 @@ func main() {
 		c.JSON(http.StatusOK, nil)
 	})
 
+	r.Static("/swaggerui", "docs/swagger.json")
+
 	log.Println("Shopping Cart service started!")
 
 	graceful.ShutdownGin(srv, time.Duration(cfg.ServerConfig.TimeoutSecs*int(time.Second)))

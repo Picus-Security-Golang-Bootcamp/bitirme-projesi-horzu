@@ -1,0 +1,1104 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Shopping Cart RestAPI handles user e-commerce shopping cart operations",
+    "version": "1.0.0",
+    "title": "Shopping Cart RestAPI",
+    "termsOfService": "http://swagger.io/terms/",
+    "contact": {
+      "email": "mertsakar@hotmail.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "basePath": "/api/v1/cart-api",
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "User authentication endpoint"
+    },
+    {
+      "name": "Category",
+      "description": "Category operations"
+    },
+    {
+      "name": "Product",
+      "description": "Product operations"
+    },
+    {
+      "name": "Cart",
+      "description": "Cart operations"
+    },
+    {
+      "name": "Order",
+      "description": "Order operations"
+    }
+  ],
+  "schemes": [
+    "https"
+  ],
+  "paths": {
+    "/user/signup": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Signup",
+        "description": "This enpoint creates a new user to the system",
+        "operationId": "createUser",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "CreateUserRequest",
+            "description": "User information",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/user.CreateUserRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "User Created",
+            "schema": {
+              "$ref": "#/definitions/user.CreateUserResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorApiResponse"
+            }
+          }
+        }
+      }
+    },
+    "/user/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Login",
+        "description": "Login logs user into the system",
+        "operationId": "loginUser",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "LoginUserRequest",
+            "description": "Login object for login credientals",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Login"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "schema": {
+              "$ref": "#/definitions/user.CreateUserResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid username/password supplied",
+            "schema": {
+              "$ref": "#/definitions/ErrorApiResponse"
+            }
+          }
+        }
+      }
+    },
+    "/category": {
+      "get": {
+        "tags": [
+          "Category"
+        ],
+        "summary": "List Category",
+        "description": "Lists all available categories",
+        "operationId": "listAllCategories",
+        "parameters": [
+          {
+            "description": "Page number",
+            "required": true,
+            "in": "query",
+            "name": "page",
+            "type": "integer"
+          },
+          {
+            "description": "Page size",
+            "required": true,
+            "in": "query",
+            "name": "pageSize",
+            "type": "integer"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/category.ListCategoryResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/category/create": {
+      "post": {
+        "tags": [
+          "Category"
+        ],
+        "summary": "Create Bulk Category",
+        "description": "Creates bulk categories with uploaded csv",
+        "operationId": "createBulk",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "description": "Authentication header",
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The file to upload.",
+            "required": true,
+            "in": "formData",
+            "name": "upfile",
+            "type": "file"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorApiResponse"
+            }
+          }
+        }
+      }
+    },
+    "/product": {
+      "post": {
+        "summary": "Create Product",
+        "tags": [
+          "Product"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "description": "Authentication header",
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "product information",
+            "in": "body",
+            "name": "CreateProductRequest",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/product.CreateProductRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/product.CreateProductResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorApiResponse"
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Product"
+        ],
+        "summary": "Update Product",
+        "description": "Updates given available products",
+        "operationId": "update",
+        "parameters": [
+          {
+            "description": "Authentication header",
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "product information",
+            "in": "body",
+            "name": "UpdateProductRequest",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/product.UpdateProductRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/product.CreateProductResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorApiResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Product"
+        ],
+        "summary": "Delete Product",
+        "description": "Deletes given available products",
+        "operationId": "delete",
+        "parameters": [
+          {
+            "description": "Authentication header",
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "sku of product",
+            "in": "query",
+            "name": "sku",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorApiResponse"
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Product"
+        ],
+        "summary": "List Product",
+        "description": "Lists all available products",
+        "operationId": "listProduct",
+        "parameters": [
+          {
+            "description": "Page number",
+            "required": true,
+            "in": "query",
+            "name": "page",
+            "type": "integer"
+          },
+          {
+            "description": "Page size",
+            "required": true,
+            "in": "query",
+            "name": "pageSize",
+            "type": "integer"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/product.GetProductResponse"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorApiResponse"
+            }
+          }
+        }
+      }
+    },
+    "/product/search": {
+      "get": {
+        "tags": [
+          "Product"
+        ],
+        "summary": "Search Product",
+        "description": "Searches for all available products by given query string",
+        "operationId": "searchProduct",
+        "parameters": [
+          {
+            "description": "Search text to find matched sku numbers and names",
+            "required": true,
+            "in": "query",
+            "name": "sku",
+            "type": "string"
+          },
+          {
+            "description": "Page number",
+            "required": true,
+            "in": "query",
+            "name": "page",
+            "type": "integer"
+          },
+          {
+            "description": "Page size",
+            "required": true,
+            "in": "query",
+            "name": "pageSize",
+            "type": "integer"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/product.GetProductResponse"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorApiResponse"
+            }
+          }
+        }
+      }
+    },
+    "/cart": {
+      "get": {
+        "summary": "List Cart Items",
+        "tags": [
+          "Cart"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "description": "Authentication header",
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/cart.Item"
+              },
+              "type": "array"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorApiResponse"
+            }
+          }
+        }
+      }
+    },
+    "/cart/item": {
+      "post": {
+        "summary": "AddToCart",
+        "tags": [
+          "Cart"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "description": "Authentication header",
+            "in": "query",
+            "name": "Authorization",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "itemId information",
+            "in": "query",
+            "name": "itemId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "quantity information",
+            "in": "query",
+            "name": "quantity",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/cartItem.AddItemResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorApiResponse"
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update Cart Item",
+        "tags": [
+          "Cart"
+        ],
+        "parameters": [
+          {
+            "description": "Authentication header",
+            "in": "query",
+            "name": "Authorization",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "itemId information",
+            "in": "query",
+            "name": "itemId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "quantity information",
+            "in": "query",
+            "name": "quantity",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/cartItem.UpdateItemResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorApiResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Cart Item",
+        "tags": [
+          "Cart"
+        ],
+        "parameters": [
+          {
+            "description": "Authentication header",
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "cartitem sku",
+            "in": "query",
+            "name": "itemId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorApiResponse"
+            }
+          }
+        }
+      }
+    },
+    "/order": {
+      "get": {
+        "summary": "List Orders",
+        "tags": [
+          "Order"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "description": "Authentication header",
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Page number",
+            "in": "query",
+            "name": "page",
+            "type": "integer"
+          },
+          {
+            "description": "Page size",
+            "in": "query",
+            "name": "pageSize",
+            "type": "integer"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/order.CompleteOrderResponse"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorApiResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Complete Order",
+        "tags": [
+          "Order"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "description": "Authentication header",
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/order.CompleteOrderResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorApiResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Cancel Order",
+        "description": "Cancel order if order date is not longer then 14 days",
+        "tags": [
+          "Order"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "description": "Authentication header",
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "orderID information",
+            "in": "query",
+            "name": "orderID",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/order.CancelOrderResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorApiResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "user.CreateUserRequest": {
+      "required": [
+        "email",
+        "password",
+        "username",
+        "name",
+        "surname"
+      ],
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "surname": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "user.CreateUserResponse": {
+      "properties": {
+        "token": {
+          "type": "string"
+        },
+        "refreshToken": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "category.ListCategoryResponse": {
+      "properties": {
+        "name": {
+          "type": "integer"
+        },
+        "description": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "product.UpdateProductRequest": {
+      "properties": {
+        "categoryID": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number",
+          "format": "float64"
+        },
+        "stock": {
+          "type": "integer",
+          "format": "uint64"
+        },
+        "sku": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "product.CreateProductRequest": {
+      "properties": {
+        "categoryID": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number",
+          "format": "float64"
+        },
+        "stock": {
+          "type": "integer",
+          "format": "uint64"
+        }
+      },
+      "type": "object"
+    },
+    "product.CreateProductResponse": {
+      "properties": {
+        "ID": {
+          "type": "integer"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "desc": {
+          "type": "string"
+        },
+        "categoryID": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number",
+          "format": "float64"
+        },
+        "sku": {
+          "type": "string"
+        },
+        "stock": {
+          "type": "integer"
+        },
+        "isActive": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "product.GetProductResponse": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "desc": {
+          "type": "string"
+        },
+        "categoryID": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number",
+          "format": "float64"
+        },
+        "sku": {
+          "type": "string"
+        },
+        "stock": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "cart.Item": {
+      "properties": {
+        "ID": {
+          "type": "integer"
+        },
+        "cartID": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string"
+        },
+        "quantity": {
+          "type": "integer"
+        },
+        "productID": {
+          "type": "integer"
+        },
+        "product": {
+          "$ref": "#/definitions/product.GetProductResponse"
+        }
+      },
+      "type": "object"
+    },
+    "cartItem.AddItemResponse": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "desc": {
+          "type": "string"
+        },
+        "categoryID": {
+          "type": "string"
+        },
+        "sku": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number",
+          "format": "float64"
+        },
+        "quantity": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "cartItem.UpdateItemResponse": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "desc": {
+          "type": "string"
+        },
+        "sku": {
+          "type": "string"
+        },
+        "quantity": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "order.CompleteOrderResponse": {
+      "properties": {
+        "orderId": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "totalPrice": {
+          "type": "number",
+          "format": "float64"
+        },
+        "totalProducts": {
+          "type": "integer"
+        },
+        "orderItems": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/product.GetProductResponse"
+          }
+        }
+      },
+      "type": "object"
+    },
+    "order.CancelOrderResponse": {
+      "properties": {
+        "orderId": {
+          "type": "string"
+        },
+        "canceled_at": {
+          "type": "string"
+        },
+        "totalPrice": {
+          "type": "number",
+          "format": "float64"
+        },
+        "totalProducts": {
+          "type": "integer"
+        },
+        "orderItems": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/product.GetProductResponse"
+          }
+        }
+      },
+      "type": "object"
+    },
+    "Login": {
+      "type": "object",
+      "required": [
+        "email",
+        "password"
+      ],
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    },
+    "SuccessfulApiResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer"
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "description": "a (key, value) map.",
+          "type": "object"
+        }
+      }
+    },
+    "ErrorApiResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "pagination.Pages": {
+      "properties": {
+        "page": {
+          "type": "integer"
+        },
+        "pageCount": {
+          "type": "integer"
+        },
+        "pageSize": {
+          "type": "integer"
+        },
+        "totalCount": {
+          "type": "integer"
+        },
+        "data": {
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "SuccessResponse": {
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "responses": {
+    "Successful": {
+      "description": "Successful operation response body",
+      "schema": {
+        "$ref": "#/definitions/SuccessfulApiResponse"
+      }
+    },
+    "NotFound": {
+      "description": "The specified resource was not found",
+      "schema": {
+        "$ref": "#/definitions/ErrorApiResponse"
+      }
+    },
+    "Unauthorized": {
+      "description": "Unauthorized",
+      "schema": {
+        "$ref": "#/definitions/ErrorApiResponse"
+      }
+    }
+  }
+}

@@ -12,7 +12,7 @@ type CartItem struct {
 	Id        string
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	DeletedAt gorm.DeletedAt
 	CartId    string
 	ProductId string
 	Quantity  uint
@@ -26,10 +26,10 @@ func (u *CartItem) BeforeCreate(tx *gorm.DB) (err error) {
 	return nil
 }
 
-func NewCartItem(productID string, cartID string, quantity uint) *CartItem{
+func NewCartItem(productID string, cartID string, quantity uint) *CartItem {
 	return &CartItem{
 		ProductId: productID,
-		Quantity: quantity,
-		CartId: cartID,
+		Quantity:  quantity,
+		CartId:    cartID,
 	}
 }

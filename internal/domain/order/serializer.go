@@ -1,32 +1,31 @@
 package order
 
 import (
-	"time"
-
-	"github.com/go-openapi/strfmt"
 	"github.com/horzu/golang/cart-api/internal/api"
 )
 
-func orderToResponse(o Order) *api.Order{
-	createdDate := strfmt.Date(o.CreatedAt)
+func orderToResponse(o Order) *api.OrderCompleteOrderResponse {
+	// createdDate := strfmt.Date(o.CreatedAt)
 
-	return &api.Order{
-		ID: o.Id,	
-		CreatedAt: createdDate,
+	return &api.OrderCompleteOrderResponse{
+		OrderID:    o.Id,
+		CreatedAt:  o.CreatedAt.String(),
+		TotalPrice: o.TotalPrice,
 	}
 }
 
-func ordersToResponse(os *[]Order) []*api.Order{
-	orders := make([]*api.Order,0)
-	for _, order := range *os{
+func ordersToResponse(os *[]Order) []*api.OrderCompleteOrderResponse {
+	orders := make([]*api.OrderCompleteOrderResponse, 0)
+	for _, order := range *os {
 		orders = append(orders, orderToResponse(order))
 	}
 	return orders
 }
 
-func responseToOrder(o *api.Order) *Order{
+func responseToOrder(o *api.OrderCompleteOrderResponse) *Order {
+
 	return &Order{
-	Id: o.ID,
-	CreatedAt: time.Time(o.CreatedAt),
+		Id:        o.OrderID,
+		IsCanceled: false,
 	}
 }

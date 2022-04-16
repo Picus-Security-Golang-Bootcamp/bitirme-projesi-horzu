@@ -524,9 +524,9 @@ definitions:
   category.ListCategoryResponse:
     properties:
       name:
-        type: integer
+        type: string
       description:
-        type: integer
+        type: string
     type: object
 
   product.UpdateProductRequest:

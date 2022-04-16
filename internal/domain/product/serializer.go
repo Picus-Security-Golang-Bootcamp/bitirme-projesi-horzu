@@ -4,24 +4,32 @@ import (
 	"github.com/horzu/golang/cart-api/internal/api"
 )
 
-func productToResponse(p *Product) api.Product {
-	return api.Product{
-		Sku:        &p.SKU,
-		Name:       &p.Name,
-		Desc:       &p.Description,
-		Price:      &p.Price,
-		StockCount: &p.Stock,
-		CategoryID: &p.CategoryId,
+func productToResponse(p *Product) api.ProductGetProductResponse {
+	return api.ProductGetProductResponse{
+		Sku:        p.SKU,
+		Name:       p.Name,
+		Desc:       p.Description,
+		Price:      p.Price,
+		Stock:      p.Stock,
+		CategoryID: p.CategoryId,
 	}
 }
 
-func responseToProduct(a *api.Product) *Product {
+func responseToProduct(a *api.ProductCreateProductRequest) *Product {
 	return &Product{
-		SKU:         *a.Sku,
-		Name:        *a.Name,
-		Description: *a.Desc,
-		Price:       *a.Price,
-		Stock:    *a.StockCount,
-		CategoryId:  *a.CategoryID,
+		Name:        a.Name,
+		Description: a.Description,
+		Price:       a.Price,
+		Stock:       int64(a.Stock),
+		CategoryId:  a.CategoryID,
+	}
+}
+func responseToUpdateProduct(a *api.ProductUpdateProductRequest) *Product {
+	return &Product{
+		Name:        a.Name,
+		Description: a.Description,
+		Price:       a.Price,
+		Stock:       int64(a.Stock),
+		CategoryId:  a.CategoryID,
 	}
 }

@@ -30,7 +30,7 @@ func NewProductHandler(r *gin.RouterGroup, cfg *config.Config, service Service) 
 }
 
 func (p *productHandler) create(c *gin.Context) {
-	productBody := &api.Product{}
+	productBody := &api.ProductCreateProductRequest{}
 
 	if err := c.Bind(productBody); err != nil {
 		c.JSON(httpErrors.ErrorResponse(httpErrors.CannotBindGivenData))
@@ -44,7 +44,7 @@ func (p *productHandler) create(c *gin.Context) {
 
 	productCreated := responseToProduct(productBody)
 
-	err := p.service.CreateProduct(c.Request.Context(), productCreated.Name, productCreated.Description, *productBody.StockCount, *productBody.Price, productCreated.CategoryId)
+	err := p.service.CreateProduct(c.Request.Context(), productCreated.Name, productCreated.Description, int64(productBody.Stock), *&productBody.Price, productCreated.CategoryId)
 	if err != nil {
 		c.JSON(httpErrors.ErrorResponse(err))
 		return
@@ -55,7 +55,7 @@ func (p *productHandler) create(c *gin.Context) {
 
 func (p *productHandler) update(c *gin.Context) {
 	sku := c.Param("sku")
-	productBody := &api.Product{Sku: &sku}
+	productBody := &api.ProductUpdateProductRequest{Sku: sku}
 	if err := c.Bind(&productBody); err != nil {
 		c.JSON(httpErrors.ErrorResponse(err))
 		return
@@ -66,7 +66,7 @@ func (p *productHandler) update(c *gin.Context) {
 		return
 	}
 
-	err := p.service.UpdateProduct(c.Request.Context(), responseToProduct(productBody))
+	err := p.service.UpdateProduct(c.Request.Context(), responseToUpdateProduct(productBody))
 	if err != nil {
 		c.JSON(httpErrors.ErrorResponse(err))
 	}
