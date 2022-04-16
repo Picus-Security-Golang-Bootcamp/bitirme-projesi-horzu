@@ -3,7 +3,6 @@ package product
 import (
 	"context"
 
-	"github.com/horzu/golang/cart-api/pkg/pagination"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -12,11 +11,10 @@ type Repository interface {
 	Create(ctx context.Context, a *Product) (*Product, error)
 	Update(ctx context.Context, a *Product) (*Product, error)
 	Delete(ctx context.Context, sku string) error
-	GetAll(ctx context.Context, page *pagination.Pages) ([]Product, int64, error)
+	GetAll(ctx context.Context, page, pageSize int) ([]Product, int64, error)
 	GetByID(ctx context.Context, id string) (*Product, error)
 	GetBySku(ctx context.Context, sku string) (*Product, error)
-	SearchByNameOrSku(ctx context.Context, str string, page *pagination.Pages) ([]*Product, int, error)
-
+	SearchByNameOrSku(ctx context.Context, str string, page, pageSize int) ([]Product, int64, error)
 }
 
 type ProductRepository struct {
@@ -67,18 +65,23 @@ func (p *ProductRepository) Delete(ctx context.Context, sku string) error {
 	return nil
 }
 
-func (p *ProductRepository) GetAll(ctx context.Context, page *pagination.Pages) ([]Product, int64, error) {
+func (p *ProductRepository) GetAll(ctx context.Context, page, pageSize int) ([]Product, int64, error) {
 	zap.L().Debug("product.repo.getAll")
 
 	var products []Product
-	var pages int64
+	var count int64
 
-	if err := p.db.Where("is_active = ?", true).Offset((page.Page - 1) * page.PageSize).Limit(page.PageSize).Find(&products).Count(&pages).Error; err != nil {
+	if err := p.db.Where("is_active = ?", true).Offset((page - 1) * pageSize).Limit(pageSize).Find(&products).Error; err != nil {
 		zap.L().Error("product.repo.getAll failed to get products", zap.Error(err))
 		return nil, 0, err
 	}
 
-	return products, pages, nil
+	if err := p.db.Find(&products).Count(&count).Error; err != nil {
+		zap.L().Error("category.repo.getAll failed to get categories count", zap.Error(err))
+		return nil, 0, err
+	}
+
+	return products, count, nil
 }
 
 func (p *ProductRepository) GetByID(ctx context.Context, id string) (*Product, error) {
@@ -102,14 +105,20 @@ func (p *ProductRepository) GetBySku(ctx context.Context, sku string) (*Product,
 }
 
 // SearchByNameOrSku finds Products that matches their sku number or names with given str field
-func (r *ProductRepository) SearchByNameOrSku(ctx context.Context, str string, page *pagination.Pages) ([]*Product, int, error) {
-	var products []*Product
-	convertedStr := "%" + str + "%"
+func (r *ProductRepository) SearchByNameOrSku(ctx context.Context, str string, page, pageSize int) ([]Product, int64, error) {
+	var products []Product
 	var count int64
-	if result := r.db.Where("Name LIKE ? OR sku Like ?", convertedStr, convertedStr).Offset((page.Page - 1) * page.PageSize).Limit(page.PageSize).Find(&products).Count(&count); result.Error != nil {
+	convertedStr := "%" + str + "%"
+
+	if result := r.db.Where("Name LIKE ? OR sku Like ?", convertedStr, convertedStr).Offset((page - 1) * pageSize).Limit(pageSize).Find(&products); result.Error != nil {
 		return nil, 0, result.Error
 	}
 
-	return products, int(count), nil
+	if err := r.db.Find(&products).Count(&count).Error; err != nil {
+		zap.L().Error("category.repo.SearchByNameOrSku failed to get products count", zap.Error(err))
+		return nil, 0, err
+	}
+
+	return products, count, nil
 }
 

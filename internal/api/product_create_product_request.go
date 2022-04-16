@@ -8,8 +8,10 @@ package api
 import (
 	"context"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // ProductCreateProductRequest product create product request
@@ -18,23 +20,98 @@ import (
 type ProductCreateProductRequest struct {
 
 	// category ID
-	CategoryID string `json:"categoryID,omitempty"`
+	// Required: true
+	CategoryID *string `json:"categoryID"`
 
 	// description
-	Description string `json:"description,omitempty"`
+	// Required: true
+	Description *string `json:"description"`
 
 	// name
-	Name string `json:"name,omitempty"`
+	// Required: true
+	Name *string `json:"name"`
 
 	// price
-	Price float64 `json:"price,omitempty"`
+	// Required: true
+	Price *float64 `json:"price"`
 
 	// stock
-	Stock uint64 `json:"stock,omitempty"`
+	// Required: true
+	Stock *uint64 `json:"stock"`
 }
 
 // Validate validates this product create product request
 func (m *ProductCreateProductRequest) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateCategoryID(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateDescription(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateName(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validatePrice(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateStock(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *ProductCreateProductRequest) validateCategoryID(formats strfmt.Registry) error {
+
+	if err := validate.Required("categoryID", "body", m.CategoryID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *ProductCreateProductRequest) validateDescription(formats strfmt.Registry) error {
+
+	if err := validate.Required("description", "body", m.Description); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *ProductCreateProductRequest) validateName(formats strfmt.Registry) error {
+
+	if err := validate.Required("name", "body", m.Name); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *ProductCreateProductRequest) validatePrice(formats strfmt.Registry) error {
+
+	if err := validate.Required("price", "body", m.Price); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *ProductCreateProductRequest) validateStock(formats strfmt.Registry) error {
+
+	if err := validate.Required("stock", "body", m.Stock); err != nil {
+		return err
+	}
+
 	return nil
 }
 

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/horzu/golang/cart-api/pkg/pagination"
 	"gorm.io/gorm"
 )
 
@@ -13,11 +12,11 @@ type ProductService struct {
 }
 
 type Service interface {
-	GetAll(ctx context.Context, page *pagination.Pages) *pagination.Pages
+	GetAll(ctx context.Context, page, pageSize int) ([]Product,int64, error) 
 	CreateProduct(ctx context.Context, name string, desc string, count int64, price float64, cid string) error
 	DeleteProduct(ctx context.Context, sku string) error
 	UpdateProduct(ctx context.Context, product *Product) error
-	SearchProduct(ctx context.Context, text string, page *pagination.Pages) *pagination.Pages
+	SearchProduct(ctx context.Context, text string, page, pageSize int) ([]Product,int64, error)
 	UpdateProductQuantityForOrder(ctx context.Context,itemList []Product, amount []int64) error 
 }
 
@@ -31,14 +30,14 @@ func NewProductService(repo *ProductRepository) Service {
 
 }
 
-func (p *ProductService) GetAll(ctx context.Context, page *pagination.Pages) *pagination.Pages {
-	products, count, err := p.repo.GetAll(ctx, page)
+func (p *ProductService) GetAll(ctx context.Context, page, pageSize int) ([]Product,int64, error)  {
+	products, count, err := p.repo.GetAll(ctx, page, pageSize)
 	if err != nil {
-		return nil
+		return nil, 0, err
 	}
-	page.Items = products
-	page.TotalCount = int(count)
-	return page
+
+
+	return products, count, nil
 }
 
 func (p *ProductService) CreateProduct(ctx context.Context, name string, desc string, count int64, price float64, cid string) error {
@@ -65,14 +64,13 @@ func (c *ProductService) UpdateProduct(ctx context.Context, product *Product) er
 }
 
 // SearchProduct finds Products that matches their sku number or names with given str field
-func (c *ProductService) SearchProduct(ctx context.Context, text string, page *pagination.Pages) *pagination.Pages {
-	products, count, err := c.repo.SearchByNameOrSku(ctx, text, page)
+func (c *ProductService) SearchProduct(ctx context.Context, text string, page, pageSize int) ([]Product,int64, error)  {
+	products, count, err := c.repo.SearchByNameOrSku(ctx, text, page, pageSize)
 	if err!=nil{
-		return nil
+		return nil, 0 ,err
 	}
-	page.Items = products
-	page.TotalCount = count
-	return page
+
+	return products, count, nil
 }
 
 func (c *ProductService) UpdateProductQuantityForOrder(ctx context.Context,itemList []Product, amount []int64) error {

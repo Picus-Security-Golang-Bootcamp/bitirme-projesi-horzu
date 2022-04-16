@@ -22,17 +22,18 @@ func NewProductHandler(r *gin.RouterGroup, cfg *config.Config, service Service) 
 	h := &productHandler{service: service, cfg: cfg}
 
 
-	r.POST("/create", h.create).Use(mw.AdminAuthMiddleware(cfg.JWTConfig.SecretKey))
-	r.PUT("/:sku", h.update).Use(mw.AdminAuthMiddleware(cfg.JWTConfig.SecretKey))
-	r.DELETE("/:sku", h.delete).Use(mw.AdminAuthMiddleware(cfg.JWTConfig.SecretKey))
 	r.GET("/", h.listProduct)
 	r.GET("/search/:sku", h.searchProduct)
+	r.Use(mw.AdminAuthMiddleware(cfg.JWTConfig.SecretKey))
+	r.POST("/", h.create)
+	r.PUT("/", h.update)
+	r.DELETE("/:sku", h.delete)
 }
 
 func (p *productHandler) create(c *gin.Context) {
 	var productBody *api.ProductCreateProductRequest
 
-	if err := c.Bind(productBody); err != nil {
+	if err := c.Bind(&productBody); err != nil {
 		c.JSON(httpErrors.ErrorResponse(httpErrors.CannotBindGivenData))
 		return
 	}
@@ -42,9 +43,9 @@ func (p *productHandler) create(c *gin.Context) {
 		return
 	}
 
-	productCreated := responseToProduct(productBody)
+	productCreated := requestToProduct(productBody)
 
-	err := p.service.CreateProduct(c.Request.Context(), productCreated.Name, productCreated.Description, int64(productBody.Stock), *&productBody.Price, productCreated.CategoryId)
+	err := p.service.CreateProduct(c, productCreated.Name, productCreated.Description, int64(*productBody.Stock), *productBody.Price, productCreated.CategoryId)
 	if err != nil {
 		c.JSON(httpErrors.ErrorResponse(err))
 		return
@@ -54,8 +55,7 @@ func (p *productHandler) create(c *gin.Context) {
 }
 
 func (p *productHandler) update(c *gin.Context) {
-	sku := c.Param("sku")
-	productBody := &api.ProductUpdateProductRequest{Sku: sku}
+	var productBody *api.ProductUpdateProductRequest
 	if err := c.Bind(&productBody); err != nil {
 		c.JSON(httpErrors.ErrorResponse(err))
 		return
@@ -66,7 +66,7 @@ func (p *productHandler) update(c *gin.Context) {
 		return
 	}
 
-	err := p.service.UpdateProduct(c.Request.Context(), responseToUpdateProduct(productBody))
+	err := p.service.UpdateProduct(c.Request.Context(), requestToUpdateProduct(productBody))
 	if err != nil {
 		c.JSON(httpErrors.ErrorResponse(err))
 	}
@@ -81,30 +81,39 @@ func (p *productHandler) delete(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusNoContent, "Product deleted")
+	c.JSON(http.StatusAccepted, api.SuccessfulAPIResponse{
+		Code: http.StatusAccepted,
+		Message: "Product Deleted",
+	})
 }
 
 func (p *productHandler) listProduct(c *gin.Context) {
-	page := pagination.NewFromGinRequest(c, -1)
-	result := p.service.GetAll(c.Request.Context(), page)
-	if result == nil {
-		c.JSON(http.StatusInternalServerError,"No products found")
+	page, pageSize := pagination.GetPaginationParametersFromRequest(c)
+	products, count, err := p.service.GetAll(c.Request.Context(), page, pageSize)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
 
+	result := pagination.NewPaginatedResponse(c, int(count))
+	result.Items = products
 
-	c.JSON(http.StatusOK, page)
+	c.JSON(http.StatusOK, result)
 }
 
 func (p *productHandler) searchProduct(c *gin.Context) {
-	page := pagination.NewFromGinRequest(c, -1)
+	page, pageSize := pagination.GetPaginationParametersFromRequest(c)
+
 	//get search keyword from query
 	searchItem := c.Param("sku")
-	result := p.service.SearchProduct(c.Request.Context(), searchItem, page)
-	if result == nil {
+	products, count, err := p.service.SearchProduct(c.Request.Context(), searchItem, page, pageSize)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError,"No products found")
 		return
 	}
 
-	c.JSON(http.StatusOK, page)
+	result := pagination.NewPaginatedResponse(c, int(count))
+	result.Items = products
+
+	c.JSON(http.StatusOK, result)
 }

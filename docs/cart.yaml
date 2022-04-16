@@ -548,6 +548,12 @@ definitions:
     type: object
 
   product.CreateProductRequest:
+    required:
+      - categoryID
+      - name
+      - description
+      - price
+      - stock
     properties:
       categoryID:
         type: string
