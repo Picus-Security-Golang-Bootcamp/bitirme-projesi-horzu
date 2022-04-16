@@ -67,6 +67,11 @@ func (a *authHandler) login(c *gin.Context) {
 		return
 	}
 
+	if err := req.Validate(strfmt.NewFormats()); err != nil {
+		c.JSON(httpErrors.ErrorResponse(err))
+		return
+	}
+
 	user, err := a.service.LoginCheck(*req.Email, *req.Password)
 	if err != nil {
 		c.JSON(httpErrors.ErrorResponse(err))

@@ -19,6 +19,7 @@ var (
 	CannotBindGivenData = errors.New("Could not bind given data")
 	ValidationError     = errors.New("Validation failed for given payload")
 	UniqueError         = errors.New("Item should be unique on database")
+	LoginError          = errors.New("Wrong username or password")
 )
 
 type RestError api.SuccessfulAPIResponse
@@ -54,7 +55,7 @@ func NewInternalServerError(causes interface{}) RestErr {
 	result := RestError{
 		Code:    http.StatusInternalServerError,
 		Message: InternalServerError.Error(),
-		Data: causes,
+		Data:    causes,
 	}
 	return result
 }
@@ -74,6 +75,8 @@ func ParseErrors(err error) RestErr {
 		return NewRestError(http.StatusBadRequest, ValidationError.Error(), err)
 	case strings.Contains(err.Error(), "23505"):
 		return NewRestError(http.StatusBadRequest, UniqueError.Error(), err)
+	case strings.Contains(err.Error(), "crypto/bcrypt"):
+		return NewRestError(http.StatusBadRequest, LoginError.Error(), err)
 
 	default:
 		if restErr, ok := err.(RestErr); ok {
