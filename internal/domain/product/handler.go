@@ -30,7 +30,7 @@ func NewProductHandler(r *gin.RouterGroup, cfg *config.Config, service Service) 
 }
 
 func (p *productHandler) create(c *gin.Context) {
-	productBody := &api.ProductCreateProductRequest{}
+	var productBody *api.ProductCreateProductRequest
 
 	if err := c.Bind(productBody); err != nil {
 		c.JSON(httpErrors.ErrorResponse(httpErrors.CannotBindGivenData))

@@ -48,7 +48,7 @@ func (p *categoryRepository) BulkCreate(ctx context.Context, categories []*Categ
 	zap.L().Debug("category.repo.BulkCreate", zap.Reflect("categories", categories))
 
 	var count int64
-	if result := p.db.FirstOrCreate(&categories).Count(&count); result.Error != nil {
+	if result := p.db.Create(&categories).Count(&count); result.Error != nil {
 		return 0, result.Error
 	}
 	return int(count), nil

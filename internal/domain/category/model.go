@@ -12,7 +12,7 @@ type Category struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
-	Name        string
+	Name        string         `gorm:"unique"`
 	Description string
 	IsActive    bool
 }
