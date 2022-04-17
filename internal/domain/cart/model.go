@@ -9,9 +9,9 @@ import (
 )
 
 var (
-	maxAllowedForBasket             = 20
-	maxAllowedQtyPerProduct         = 9
-	minCartAmountForOrder   float64 = 50
+	MaxAllowedForBasket             = 20
+	MaxAllowedQtyPerProduct         = 9
+	MinCartAmountForOrder   float64 = 50
 )
 
 

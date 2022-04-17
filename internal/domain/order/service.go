@@ -41,19 +41,27 @@ func (service *orderService) CompleteOrderWithUserId(ctx context.Context, userId
 	if err != nil {
 		return err
 	}
-	for _, value := range cartItems{
-
-		fmt.Println(value.Product.Price)
-	}
-
+	
 	if len(cartItems) == 0 {
 		return errors.New("No items in the cart")
 	}
 
 	orderedItems := cartItemsToOrderItems(cartItems)
 
+	var totalPrice float64
+	for _, value := range cartItems{
+		totalPrice = totalPrice + value.Product.Price
+		fmt.Println(value.Product.Price)
+	}
+
+	if totalPrice < float64(cart.MinCartAmountForOrder){
+		return errors.New(fmt.Sprintf("You can't add more this item to your basket. Minimum allowed cart total is %.2f", cart.MinCartAmountForOrder))
+	}
+
+	newOrder := NewOrder(userId, orderedItems)
+	newOrder.TotalPrice = totalPrice
 	// Complete Order
-	err = service.repo.Create(ctx, NewOrder(userId, orderedItems))
+	err = service.repo.Create(ctx, newOrder)
 
 	// Clear cart
 	service.cartService.ClearCart(ctx, cartItems)

@@ -30,14 +30,10 @@ func (u *Order) BeforeCreate(tx *gorm.DB) (err error) {
 }
 
 func NewOrder(userID string, items []orderItem.OrderItem) *Order {
-	// var totalPrice float64 = 0.0
-	// for _, item := range items {
-	// 	totalPrice += item.Product.Price
-	// }
+
 	return &Order{
 		UserId:     userID,
 		Items:      items,
-		// TotalPrice: totalPrice,
 		IsCanceled: false,
 	}
 }
