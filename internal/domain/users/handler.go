@@ -65,14 +65,36 @@ func (a *authHandler) Signup(c *gin.Context) {
 		return
 	}
 
-	err := a.service.Create(c, responseToUser(user))
+	newUser, err := a.service.Create(c, responseToUser(user))
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "This user is already registered."})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "registration success!"})
+	jwtClaimsForToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"userID": newUser.Id,
+		"role":   newUser.Role.Role,
+		"email":  newUser.Email,
+		"iat":    time.Now().Unix(),
+		"exp":    time.Now().Add(time.Duration(a.cfg.JWTConfig.SessionTime) * time.Second).Unix(),
+	})
+
+	jwtClaimsForRefreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"userID": newUser.Id,
+		"role":   newUser.Role.Role,
+		"email":  newUser.Email,
+		"iat":    time.Now().Unix(),
+		"exp":    time.Now().Add(time.Duration(a.cfg.JWTConfig.SessionTime*refreshTokenTime) * time.Second).Unix(),
+	})
+
+	token := jwtHelper.GenerateToken(jwtClaimsForToken, a.cfg.JWTConfig.SecretKey)
+	refreshToken := jwtHelper.GenerateToken(jwtClaimsForRefreshToken, a.cfg.JWTConfig.SecretKey)
+
+	c.JSON(http.StatusOK, tokenStruct{
+		Token:        token,
+		RefreshToken: refreshToken,
+	})
 }
 
 func (a *authHandler) login(c *gin.Context) {

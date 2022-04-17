@@ -13,7 +13,7 @@ type userService struct {
 }
 
 type Service interface {
-	Create(ctx context.Context,user *User) error 
+	Create(ctx context.Context,user *User)  (*User, error) 
 	LoginCheck(email ,password string) (*User, error) 
 	GetUserId(email string) *User
 }
@@ -26,15 +26,15 @@ func NewUserService(repo Repository, cartService cart.Service) Service {
 	return &userService{repo: repo, cartService: cartService}
 }
 
-func (u *userService) Create(ctx context.Context, user *User) error {
+func (u *userService) Create(ctx context.Context, user *User) (*User, error) {
 	newUser, err := u.repo.Create(user)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	u.cartService.Create(ctx, newUser.Id)
 
-	return nil
+	return newUser, nil
 }
 
 func (u *userService) GetUserId(email string) *User {
