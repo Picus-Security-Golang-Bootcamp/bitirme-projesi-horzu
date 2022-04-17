@@ -9,7 +9,7 @@ ServerConfig:
   WriteTimeoutSecs: 12
 
 JWTConfig:
-  SessionTime: 3600
+  SessionTime: 14400
   SecretKey: dummySecretKey
 
 DBConfig:

@@ -3,7 +3,6 @@ package cart
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/horzu/golang/cart-api/internal/domain/cart/cartItem"
 	"github.com/horzu/golang/cart-api/internal/domain/product"
@@ -16,14 +15,14 @@ type CartService struct {
 }
 
 type Service interface {
-	Get(ctx context.Context, id string) ([]*cartItem.CartItem, error)
+	GetAllCartItems(ctx context.Context, id string) ([]cartItem.CartItem, error)
 	Create(ctx context.Context, customerId string) error
 	AddItem(ctx context.Context, sku string, cartId string, orderQuantity int64) (string, error)
 	UpdateItem(ctx context.Context, id string, cartId string, updateQuantity uint) error
-	GetCartItems(ctx context.Context, cartId string) ([]*cartItem.CartItem, error)
-	DeleteItem(ctx context.Context, basketId, itemId string) error
+	GetCartItems(ctx context.Context, cartId string) ([]cartItem.CartItem, error)
+	DeleteItem(ctx context.Context, cartId, itemId string) error
 	GetCartByUserId(ctx context.Context, UserID string) (*Cart, error)
-	ClearBasket(ctx context.Context, cart *Cart)
+	ClearCart(ctx context.Context, cartitems []cartItem.CartItem)
 }
 
 func NewCartService(r Repository, productRepository product.Repository, cartItemRepository cartItem.Repository) *CartService {
@@ -34,14 +33,12 @@ func NewCartService(r Repository, productRepository product.Repository, cartItem
 	}
 }
 
-func (service *CartService) Get(ctx context.Context, id string) ([]*cartItem.CartItem, error) {
+func (service *CartService) GetAllCartItems(ctx context.Context, id string) ([]cartItem.CartItem, error) {
 	if len(id) == 0 {
 		return nil, errors.New("Id cannot be nil or empty")
 	}
 
 	cart, err := service.GetCartByUserId(ctx, id)
-
-	fmt.Println(cart.Id)
 
 	if err != nil {
 		return nil, errors.New(err.Error())
@@ -127,8 +124,8 @@ func (service *CartService) DeleteItem(ctx context.Context, cartId, itemId strin
 }
 
 // GetCartItems returns the items inside the given user's cart
-func (service *CartService) GetCartItems(ctx context.Context, cartId string) ([]*cartItem.CartItem, error) {
-	cart, err := service.cartRepo.FindOrCreateByUserID(ctx, cartId)
+func (service *CartService) GetCartItems(ctx context.Context, cartId string) ([]cartItem.CartItem, error) {
+	cart, err := service.cartRepo.FindByUserId(ctx, cartId)
 	if err != nil {
 		return nil, err
 	}
@@ -152,8 +149,8 @@ func (service *CartService) GetCartByUserId(ctx context.Context, UserID string) 
 
 }
 
-func (service *CartService) ClearBasket(ctx context.Context, cart *Cart) {
-	for _, item := range *cart.Items {
+func (service *CartService) ClearCart(ctx context.Context, cartitems []cartItem.CartItem) {
+	for _, item := range cartitems {
 		service.cartItemRepo.DeleteById(ctx, item.Id)
 	}
 }

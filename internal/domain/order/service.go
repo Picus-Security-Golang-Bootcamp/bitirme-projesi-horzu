@@ -3,6 +3,7 @@ package order
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/horzu/golang/cart-api/internal/domain/cart"
 	"github.com/horzu/golang/cart-api/internal/domain/order/orderItem"
@@ -11,7 +12,8 @@ import (
 
 type orderService struct {
 	repo           Repository
-	orderItemRepo  orderItem.OrderItemRepository
+	orderItemRepo  *orderItem.OrderItemRepository
+	cartRepository *cart.CartRepository
 	cartService    cart.Service
 	productService product.Service
 }
@@ -20,49 +22,39 @@ type Service interface {
 	CompleteOrderWithUserId(ctx context.Context, userId string) error
 }
 
-func NewOrderService(orderRepo *OrderRepository, orderItemRepo *orderItem.OrderItemRepository, cartService cart.Service, productService product.Service) Service {
+func NewOrderService(orderRepo Repository, orderItemRepo *orderItem.OrderItemRepository, cartService cart.Service, productService product.Service, cartRepository *cart.CartRepository) Service {
 	return &orderService{
 		repo:           orderRepo,
-		orderItemRepo:  *orderItemRepo,
+		orderItemRepo:  orderItemRepo,
 		cartService:    cartService,
 		productService: productService,
+		cartRepository: cartRepository,
 	}
 }
 
-//CompleteOrderWithUserId crates order from items that is in basket and clear the basket
+//CompleteOrderWithUserId crates order from items that is in cart and clear the cart
 func (service *orderService) CompleteOrderWithUserId(ctx context.Context, userId string) error {
-	//get user cart
-	cart, err := service.cartService.GetCartByUserId(ctx, userId)
+	cartItems, err := service.cartService.GetAllCartItems(ctx, userId)
 	if err != nil {
 		return err
 	}
-	//check cart is empty
-	if len(*cart.Items) < 1 {
-		return errors.New("basket empty")
-	}
-	//prepare update product input service
-	var productList []product.Product = []product.Product{}
-	var orderAmountList []int64 = []int64{}
-	for _, item := range *cart.Items {
-		productList = append(productList, *item.Product)
-		orderAmountList = append(orderAmountList, int64(item.Quantity))
-	}
-	//update products quantity which are in basket
-	errUpdQuant := service.productService.UpdateProductQuantityForOrder(ctx, productList, orderAmountList)
-	if errUpdQuant != nil {
-		return errUpdQuant
+	for _, value := range cartItems{
+
+		fmt.Println(value.Product.Price)
 	}
 
-	//create order
-	order := NewOrder(*cart)
-	_, err1 := service.repo.Create(ctx, order)
-
-	if err1 != nil {
-		return err1
+	if len(cartItems) == 0 {
+		return errors.New("No items in the cart")
 	}
 
-	//CLEAR BASKET
-	service.cartService.ClearBasket(ctx, cart)
+	orderedItems := cartItemsToOrderItems(cartItems)
+
+	// Complete Order
+	err = service.repo.Create(ctx, NewOrder(userId, orderedItems))
+
+	// Clear cart
+	service.cartService.ClearCart(ctx, cartItems)
 
 	return nil
 }
+

@@ -13,9 +13,16 @@ func NewOrderItemRepository(db *gorm.DB) *OrderItemRepository {
 	return &OrderItemRepository{db: db}
 }
 
+func (c *OrderItemRepository) Migration() {
+	err := c.db.AutoMigrate(&OrderItem{})
+	if err != nil {
+		zap.L().Debug("order.repo.migration", zap.Reflect("product", err))
+	}
+}
 
 
-func (oir *OrderItemRepository) create(oi *OrderItem) (*OrderItem, error) {
+
+func (oir *OrderItemRepository) Create(oi *OrderItem) (*OrderItem, error) {
 	zap.L().Debug("product.repo.create", zap.Reflect("product", oi))
 
 	if err := oir.db.Create(oi).Error; err != nil {
@@ -26,7 +33,7 @@ func (oir *OrderItemRepository) create(oi *OrderItem) (*OrderItem, error) {
 	return oi, nil
 }
 
-func (oir *OrderItemRepository) update(oi *OrderItem) (*OrderItem, error) {
+func (oir *OrderItemRepository) Update(oi *OrderItem) (*OrderItem, error) {
 	zap.L().Debug("product.repo.update", zap.Reflect("product", oi))
 
 	if result := oir.db.Save(&oi); result.Error != nil {

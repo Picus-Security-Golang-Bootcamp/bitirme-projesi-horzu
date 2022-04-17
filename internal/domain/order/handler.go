@@ -1,63 +1,49 @@
 package order
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/horzu/golang/cart-api/internal/api"
+	"github.com/horzu/golang/cart-api/internal/domain/cart"
 	"github.com/horzu/golang/cart-api/pkg/config"
-	jwtHelper "github.com/horzu/golang/cart-api/pkg/jwt"
 	mw "github.com/horzu/golang/cart-api/pkg/middleware"
 )
 
 type orderHandler struct {
 	service Service
 	cfg     *config.Config
+	cartService *cart.CartService
 }
 
-func NewOrderHandler(r *gin.RouterGroup, cfg *config.Config, service Service) {
-	h := &orderHandler{service: service, cfg: cfg}
-	r.Use(mw.AdminAuthMiddleware(cfg.JWTConfig.SecretKey))
+func NewOrderHandler(r *gin.RouterGroup, cfg *config.Config, service Service, cartService *cart.CartService) {
+	h := &orderHandler{service: service, cfg: cfg, cartService: cartService}
+	r.Use(mw.UserAuthMiddleware(cfg.JWTConfig.SecretKey))
 
 	r.POST("/", h.CompleteOrderWithUserId)
 
 }
 
-func (c *orderHandler) CompleteOrderWithUserId(g *gin.Context) {
-	userId := getUserIdFromAuthToken(g.GetHeader("Authorization"), c.cfg.JWTConfig.SecretKey)
-
-	err := c.service.CompleteOrderWithUserId(g.Request.Context(), userId)
+func (order *orderHandler) CompleteOrderWithUserId(g *gin.Context) {
+	userId := g.GetString("userID")
+	fmt.Println(userId)
+	err := order.service.CompleteOrderWithUserId(g, userId)
 
 	if err != nil {
 		log.Println(err.Error())
-		g.JSON(http.StatusBadRequest, ApiErrorResponse{
-			IsSuccess:    false,
-			ErrorMessage: err.Error(),
+		g.JSON(http.StatusBadRequest, api.ErrorAPIResponse{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
 		})
 		g.Abort()
 		return
 	}
 
-	g.JSON(http.StatusCreated, ApiOkResponse{
-		IsSuccess: true,
-		Message:   "ok",
+	g.JSON(http.StatusCreated, api.SuccessfulAPIResponse{
+		Code:    http.StatusOK,
+		Message: "ok",
 	})
 }
 
-func getUserIdFromAuthToken(token, secretKey string) string {
-	decodedClaims := jwtHelper.VerifyToken(token, secretKey)
-	userId := decodedClaims.UserId
-
-	return userId
-}
-
-type ApiErrorResponse struct {
-	IsSuccess    bool   `json:"is_success"`
-	ErrorMessage string `json:"error_message"`
-}
-
-type ApiOkResponse struct {
-	IsSuccess bool        `json:"is_success"`
-	Message   string      `json:"message"`
-	Data      interface{} `json:"data"`
-}

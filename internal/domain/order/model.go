@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/horzu/golang/cart-api/internal/domain/cart"
 	"github.com/horzu/golang/cart-api/internal/domain/order/orderItem"
 	"gorm.io/gorm"
 )
@@ -17,9 +16,8 @@ type Order struct {
 	TotalPrice float64
 	IsCanceled bool
 
-	Items  []*orderItem.OrderItem
+	Items  []orderItem.OrderItem `gorm:"foreignKey:OrderId"`
 	UserId string
-
 }
 
 func (u *Order) BeforeCreate(tx *gorm.DB) (err error) {
@@ -28,28 +26,22 @@ func (u *Order) BeforeCreate(tx *gorm.DB) (err error) {
 	return nil
 }
 
-func NewOrder(cart cart.Cart) *Order {
-
-	order := &Order{
-		TotalPrice: cart.TotalPrice,
-		UserId:     cart.UserID,
-		Items:      []*orderItem.OrderItem{},
+func NewOrder(userID string, items []orderItem.OrderItem) *Order {
+	// var totalPrice float64 = 0.0
+	// for _, item := range items {
+	// 	totalPrice += item.Product.Price
+	// }
+	return &Order{
+		UserId:     userID,
+		Items:      items,
+		// TotalPrice: totalPrice,
+		IsCanceled: false,
 	}
-
-	for _, item := range *cart.Items {
-		orderItem := orderItem.NewOrderItem(item)
-		order.Items = append(order.Items, *&orderItem)
-	}
-
-	return order
-
 }
-
-func (o *Order) isCancelable() bool {
-	orderDate := o.CreatedAt
-	now := time.Now()
-	if now.Sub(orderDate) < time.Hour*24*14 {
-		return true
+func NewOrderItem(quantity uint, productID string) *orderItem.OrderItem {
+	return &orderItem.OrderItem{
+		Quantity:   quantity,
+		ProductId:  productID,
+		IsCanceled: false,
 	}
-	return false
 }

@@ -2,6 +2,7 @@ package cart
 
 import (
 	"context"
+	"fmt"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -15,7 +16,6 @@ type Repository interface {
 	Delete(ctx context.Context, id string) error
 	GetAll(ctx context.Context) ([]*Cart, error)
 	GetByID(ctx context.Context, id string) (*Cart, error)
-	FindOrCreateByUserID(ctx context.Context, userId string) (*Cart, error)
 	FindByUserId(ctx context.Context, userId string) (*Cart, error)
 }
 
@@ -98,21 +98,12 @@ func (o *CartRepository) GetByID(ctx context.Context, id string) (*Cart, error) 
 	return cart, nil
 }
 
-// FindOrCreateByUserID returns the cart of the user if exists
-// If cart does not exist, it creates a new one
-func (o *CartRepository) FindOrCreateByUserID(ctx context.Context, userId string) (*Cart, error) {
-	var cart *Cart
-	err := o.db.Where(Cart{UserID: userId}).Attrs(NewCart(userId)).FirstOrCreate(&cart).Error
-	if err != nil {
-		return nil, err
-	}
-	return cart, nil
-}
-
 func (o *CartRepository) FindByUserId(ctx context.Context, userId string) (*Cart, error) {
 	var cart *Cart
 
-	result := o.db.Where("user_id = ?", userId).Limit(1).Find(&cart)
+	fmt.Println(userId)
+
+	result := o.db.Where("user_id = ?", userId).First(&cart)
 
 	if result.Error != nil {
 		return nil, result.Error

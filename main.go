@@ -64,6 +64,7 @@ func main() {
 
 	rootRouter := r.Group(cfg.ServerConfig.RouterPrefix)
 
+	// Routes
 	authRouter := rootRouter.Group("/user")
 	categoryRouter := rootRouter.Group("/category")
 	productRouter := rootRouter.Group("/products")
@@ -84,7 +85,7 @@ func main() {
 	cartItemRepo := cartItem.NewCartCartItemRepository(DB)
 	cartItemRepo.Migration()
 	orderItemRepo := orderItem.NewOrderItemRepository(DB)
-	categoryRepo.Migration()
+	orderItemRepo.Migration()
 	orderRepo := order.NewOrderRepository(DB)
 	orderRepo.Migration()
 
@@ -93,14 +94,14 @@ func main() {
 	productService := product.NewProductService(productRepo)
 	cartService := cart.NewCartService(cartRepo, productRepo, cartItemRepo)
 	userService := users.NewUserService(userRepo, cartService)
-	orderService := order.NewOrderService(orderRepo, orderItemRepo, cartService, productService)
+	orderService := order.NewOrderService(orderRepo, orderItemRepo, cartService, productService, cartRepo)
 
 	// Handlers
 	users.NewAuthHandler(authRouter, cfg, userService)
 	category.NewCategoryHandler(categoryRouter, cfg, categoryService)
 	product.NewProductHandler(productRouter, cfg, productService)
 	cart.NewCartHandler(cartRouter, cfg, cartService)
-	order.NewOrderHandler(orderRouter, cfg, orderService)
+	order.NewOrderHandler(orderRouter, cfg, orderService, cartService)
 
 
 	go func() {
@@ -127,8 +128,6 @@ func main() {
 		}
 		c.JSON(http.StatusOK, nil)
 	})
-
-	r.Static("/swaggerui", "docs/swagger.json")
 
 	log.Println("Shopping Cart service started!")
 

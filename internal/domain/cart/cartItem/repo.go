@@ -14,7 +14,7 @@ type Repository interface {
 	Update(ctx context.Context, cartItem *CartItem) error
 	DeleteById(ctx context.Context, id string) error
 	FindByID(ctx context.Context, itemId string, cartId string) (*CartItem, error)
-	GetItems(ctx context.Context, cartId string) ([]*CartItem, error) 
+	GetItems(ctx context.Context, cartId string) ([]CartItem, error) 
 }
 
 type CartItemRepository struct {
@@ -77,8 +77,8 @@ func (c *CartItemRepository) FindByID(ctx context.Context, cartId string, produc
 }
 
 // GetItems return items in cart
-func (c *CartItemRepository) GetItems(ctx context.Context, cartId string) ([]*CartItem, error) {
-	var cartItems []*CartItem
+func (c *CartItemRepository) GetItems(ctx context.Context, cartId string) ([]CartItem, error) {
+	var cartItems []CartItem
 	err := c.db.Where(&CartItem{CartId: cartId}).Find(&cartItems).Error
 	if err != nil {
 		return nil, err

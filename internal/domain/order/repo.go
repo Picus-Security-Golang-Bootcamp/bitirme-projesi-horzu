@@ -3,15 +3,17 @@ package order
 import (
 	"context"
 
+	"github.com/horzu/golang/cart-api/internal/domain/order/orderItem"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
 type Repository interface {
-	Create(ctx context.Context, o *Order) (*Order, error)
+	Create(ctx context.Context, o *Order) error
 	DeleteById(ctx context.Context, id string) error
 	GetAllByUser(ctx context.Context, id string) ([]*Order, error)
 	GetByID(ctx context.Context, id string) (*Order, error)
+	CreateWithCartItems(ctx context.Context, items []*orderItem.OrderItem) error 
 }
 
 type OrderRepository struct {
@@ -26,15 +28,25 @@ func (or *OrderRepository) Migration() {
 	or.db.AutoMigrate(&Order{})
 }
 
-func (or *OrderRepository) Create(ctx context.Context, o *Order) (*Order, error) {
+func (or *OrderRepository) Create(ctx context.Context, o *Order) error {
 	zap.L().Debug("order.repo.create", zap.Reflect("order", o))
 
 	if err := or.db.Create(o).Error; err != nil {
 		zap.L().Error("order.repo.Create failed to create order", zap.Error(err))
-		return nil, err
+		return err
 	}
 
-	return o, nil
+	return nil
+}
+func (or *OrderRepository) CreateWithCartItems(ctx context.Context, items []*orderItem.OrderItem) error {
+	zap.L().Debug("order.repo.create failed to create order", zap.Reflect("order", items))
+
+	if err := or.db.Create(items).Error; err != nil {
+		zap.L().Error("order.repo.Create failed to create order", zap.Error(err))
+		return err
+	}
+
+	return nil
 }
 
 func (or *OrderRepository) DeleteById(ctx context.Context, id string) error {

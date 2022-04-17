@@ -30,7 +30,7 @@ func NewCartHandler(r *gin.RouterGroup, cfg *config.Config, service Service) {
 func (c *cartHandler) listCartItems(g *gin.Context) {
 	userId := g.GetString("userID")
 
-	result, err := c.service.Get(g, userId)
+	result, err := c.service.GetAllCartItems(g, userId)
 	if err != nil {
 		g.JSON(http.StatusInternalServerError, err.Error())
 	}

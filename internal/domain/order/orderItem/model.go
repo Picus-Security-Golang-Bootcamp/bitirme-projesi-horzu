@@ -15,7 +15,7 @@ type OrderItem struct {
 	UpdatedAt  time.Time
 	DeletedAt  gorm.DeletedAt `gorm:"index"`
 	OrderId    string
-	Quantity   int
+	Quantity   uint
 	IsCanceled bool
 	
 	ProductId  string
@@ -31,7 +31,7 @@ func (u *OrderItem) BeforeCreate(tx *gorm.DB) (err error) {
 func NewOrderItem(cartItem cartItem.CartItem) *OrderItem {
 	item := &OrderItem{
 		ProductId: cartItem.ProductId,
-		Quantity:  int(cartItem.Quantity),
+		Quantity:  cartItem.Quantity,
 	}
 	return item
 }
