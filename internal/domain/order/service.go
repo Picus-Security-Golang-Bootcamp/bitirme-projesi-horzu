@@ -32,7 +32,7 @@ func NewOrderService(orderRepo *OrderRepository, orderItemRepo *orderItem.OrderI
 //CompleteOrderWithUserId crates order from items that is in basket and clear the basket
 func (service *orderService) CompleteOrderWithUserId(ctx context.Context, userId string) error {
 	//get user cart
-	cart, err := service.cartService.FetchCartByUserId(ctx, userId)
+	cart, err := service.cartService.GetCartByUserId(ctx, userId)
 	if err != nil {
 		return err
 	}

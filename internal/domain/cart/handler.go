@@ -1,7 +1,6 @@
 package cart
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -19,7 +18,7 @@ type cartHandler struct {
 func NewCartHandler(r *gin.RouterGroup, cfg *config.Config, service Service) {
 	h := &cartHandler{service: service, cfg: cfg}
 
-	r.Use(mw.AdminAuthMiddleware(cfg.JWTConfig.SecretKey))
+	r.Use(mw.UserAuthMiddleware(cfg.JWTConfig.SecretKey))
 	r.GET("/", h.listCartItems)
 	r.POST("/:id", h.createCart)
 	
@@ -57,20 +56,18 @@ func (c *cartHandler) createCart(g *gin.Context) {
 func (c *cartHandler) addTocart(g *gin.Context) {
 	userId := g.GetString("userID")
 
-	itemId := g.Query("itemId")
-	quantity := g.Query("quantity")
-	fmt.Println(userId)
+	sku := g.Query("itemId")
 
-	quantitya, err := strconv.Atoi(quantity)
+	quantity, err := strconv.Atoi(g.Query("quantity"))
 
 	if err!=nil{
 		g.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	cart, err := c.service.FetchCartByUserId(g, userId)
+	cart, err := c.service.GetCartByUserId(g, userId)
 
-	if itemId, err := c.service.AddItem(g.Request.Context(), itemId, cart.Id, int64(quantitya)); err != nil {
+	if itemId, err := c.service.AddItem(g.Request.Context(), sku, cart.Id, int64(quantity)); err != nil {
 		g.JSON(http.StatusBadRequest, err.Error())
 		return
 	} else {

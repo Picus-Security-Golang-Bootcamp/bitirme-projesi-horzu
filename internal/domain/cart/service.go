@@ -21,7 +21,7 @@ type Service interface {
 	UpdateItem(ctx context.Context, id string, cartId string, updateQuantity uint) error
 	GetCartItems(ctx context.Context, cartId string) ([]*cartItem.CartItem, error)
 	DeleteItem(ctx context.Context, basketId, itemId string) error
-	FetchCartByUserId(ctx context.Context, UserID string) (Cart, error)
+	GetCartByUserId(ctx context.Context, UserID string) (Cart, error)
 	ClearBasket(ctx context.Context, cart *Cart)
 }
 
@@ -66,7 +66,7 @@ func (service *CartService) AddItem(ctx context.Context, sku string, cartId stri
 	if err != nil {
 		return "", err
 	}
-	_, err = service.cartItemRepo.FindByID(ctx, addedProduct.Id, cart.Id)
+	_, err = service.cartItemRepo.FindByID(ctx, cart.Id,addedProduct.Id)
 	if err == nil {
 		return "", ErrItemAlreadyInCart
 	}
@@ -122,8 +122,8 @@ func (service *CartService) GetCartItems(ctx context.Context, cartId string) ([]
 	return items, nil
 }
 
-//FetchCartByUserId it returns cart model for complete
-func (service *CartService) FetchCartByUserId(ctx context.Context, UserID string) (Cart, error) {
+//GetCartByUserId it returns cart model for complete
+func (service *CartService) GetCartByUserId(ctx context.Context, UserID string) (Cart, error) {
 	cart, err := service.cartRepo.FindByUserId(ctx, UserID)
 
 	if err != nil {
