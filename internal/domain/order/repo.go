@@ -14,6 +14,7 @@ type Repository interface {
 	GetAllByUser(ctx context.Context, id string) ([]*Order, error)
 	GetByID(ctx context.Context, id string) (*Order, error)
 	CreateWithCartItems(ctx context.Context, items []*orderItem.OrderItem) error 
+	Update(ctx context.Context ,newOrder Order) error
 }
 
 type OrderRepository struct {
@@ -38,6 +39,17 @@ func (or *OrderRepository) Create(ctx context.Context, o *Order) error {
 
 	return nil
 }
+
+func (or *OrderRepository) Update(ctx context.Context ,newOrder Order) error {
+	result := or.db.Save(&newOrder)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
 func (or *OrderRepository) CreateWithCartItems(ctx context.Context, items []*orderItem.OrderItem) error {
 	zap.L().Debug("order.repo.create failed to create order", zap.Reflect("order", items))
 

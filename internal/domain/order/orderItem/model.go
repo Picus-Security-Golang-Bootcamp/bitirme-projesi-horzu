@@ -16,7 +16,6 @@ type OrderItem struct {
 	DeletedAt  gorm.DeletedAt `gorm:"index"`
 	OrderId    string
 	Quantity   uint
-	IsCanceled bool
 	
 	ProductId  string
 	Product *product.Product

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/horzu/golang/cart-api/internal/domain/cart"
 	"github.com/horzu/golang/cart-api/internal/domain/order/orderItem"
@@ -21,6 +22,7 @@ type orderService struct {
 type Service interface {
 	CompleteOrderWithUserId(ctx context.Context, userId string) error
 	GetAll(ctx context.Context, userId string) ([]*Order,error)
+	CancelOrder(ctx context.Context, userId, orderId string) error
 }
 
 func NewOrderService(orderRepo Repository, orderItemRepo *orderItem.OrderItemRepository, cartService cart.Service, productService product.Service, cartRepository *cart.CartRepository) Service {
@@ -68,4 +70,23 @@ func (service *orderService) GetAll(ctx context.Context, userId string) ([]*Orde
 	}
 
 	return orders, nil
+}
+
+//CancelOrder deletes order of the user if 14 days has not passed
+func (service *orderService) CancelOrder(ctx context.Context, userId, orderId string) error {
+	canceledOrder, err := service.repo.GetByID(ctx, orderId)
+	if err != nil {
+		return err
+	}
+	if canceledOrder.UserId != userId {
+		return errors.New("No order found")
+	}
+	if canceledOrder.CreatedAt.Sub(time.Now()).Hours() > days14ToHours {
+		return errors.New("Cancel Duration passed")
+	}
+	canceledOrder.IsCanceled = true
+	err = service.repo.Update(ctx, *canceledOrder)
+	err = service.repo.DeleteById(ctx ,canceledOrder.Id)
+
+	return err
 }

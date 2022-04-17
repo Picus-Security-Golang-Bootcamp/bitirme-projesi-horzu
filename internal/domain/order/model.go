@@ -8,6 +8,8 @@ import (
 	"gorm.io/gorm"
 )
 
+var days14ToHours float64 = 14 * 24
+
 type Order struct {
 	Id         string
 	CreatedAt  time.Time
@@ -42,6 +44,5 @@ func NewOrderItem(quantity uint, productID string) *orderItem.OrderItem {
 	return &orderItem.OrderItem{
 		Quantity:   quantity,
 		ProductId:  productID,
-		IsCanceled: false,
 	}
 }

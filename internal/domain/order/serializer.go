@@ -18,6 +18,5 @@ func cartItemToOrderItem(cartItem cartItem.CartItem) orderItem.OrderItem  {
 	return orderItem.OrderItem {
 		Quantity: cartItem.Quantity,
 		ProductId: cartItem.ProductId,
-		IsCanceled: false,
 	}
 }

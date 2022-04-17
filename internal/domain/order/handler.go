@@ -22,12 +22,13 @@ func NewOrderHandler(r *gin.RouterGroup, cfg *config.Config, service Service, ca
 	h := &orderHandler{service: service, cfg: cfg, cartService: cartService}
 	r.Use(mw.UserAuthMiddleware(cfg.JWTConfig.SecretKey))
 
-	r.POST("/", h.CompleteOrderWithUserId)
-	r.GET("/", h.ListAll)
+	r.POST("/", h.completeOrderWithUserId)
+	r.GET("/", h.listAll)
+	r.DELETE("/:id", h.cancelOrder)
 
 }
 
-func (order *orderHandler) CompleteOrderWithUserId(g *gin.Context) {
+func (order *orderHandler) completeOrderWithUserId(g *gin.Context) {
 	userId := g.GetString("userID")
 	fmt.Println(userId)
 	err := order.service.CompleteOrderWithUserId(g, userId)
@@ -48,7 +49,7 @@ func (order *orderHandler) CompleteOrderWithUserId(g *gin.Context) {
 	})
 }
 
-func (order *orderHandler) ListAll(g *gin.Context) {
+func (order *orderHandler) listAll(g *gin.Context) {
 	userId := g.GetString("userID")
 
 	orders, err:= order.service.GetAll(g, userId)
@@ -70,3 +71,25 @@ func (order *orderHandler) ListAll(g *gin.Context) {
 	})
 }
 
+func (order *orderHandler) cancelOrder(g *gin.Context) {
+	userId := g.GetString("userID")
+
+	orderId := g.Param("id")
+
+	err:= order.service.CancelOrder(g, userId, orderId)
+
+	if err != nil {
+		log.Println(err.Error())
+		g.JSON(http.StatusBadRequest, api.ErrorAPIResponse{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
+		g.Abort()
+		return
+	}
+
+	g.JSON(http.StatusCreated, api.SuccessfulAPIResponse{
+		Code:    http.StatusOK,
+		Message: "Order Canceled",
+	})
+}
