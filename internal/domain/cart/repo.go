@@ -10,7 +10,7 @@ import (
 // Repository encapsulates the logic to access basket from the data source.
 type Repository interface {
 	Get(ctx context.Context, id string) *Cart
-	Create(ctx context.Context, b *Cart) (*Cart, error)
+	Create(ctx context.Context, b *Cart) error
 	Update(ctx context.Context, a *Cart) (*Cart, error)
 	Delete(ctx context.Context, id string) error
 	GetAll(ctx context.Context) ([]*Cart, error)
@@ -38,15 +38,15 @@ func (o *CartRepository) Get(ctx context.Context, id string) *Cart {
 	return cart
 }
 
-func (o *CartRepository) Create(ctx context.Context, c *Cart) (*Cart, error) {
+func (o *CartRepository) Create(ctx context.Context, c *Cart) error {
 	zap.L().Debug("cart.repo.create", zap.Reflect("cart", c))
 
 	if err := o.db.Create(c).Error; err != nil {
 		zap.L().Error("cart.repo.Create failed to create cart", zap.Error(err))
-		return nil, err
+		return err
 	}
 
-	return c, nil
+	return nil
 }
 
 func (o *CartRepository) Update(ctx context.Context, c *Cart) (*Cart, error) {

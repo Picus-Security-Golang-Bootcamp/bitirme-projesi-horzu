@@ -70,45 +70,38 @@ func main() {
 	cartRouter := rootRouter.Group("/cart")
 	orderRouter := rootRouter.Group("/orders")
 
-	// Role Repository
+	// Repositories
 	roleRepo := role.NewRoleRepository(DB)
 	roleRepo.Migration()
-	// roleRepo.InserSampleData()
-	// User Repository
 	userRepo := users.NewUserRepository(DB)
 	userRepo.Migration()
-	userService := users.NewUserService(userRepo)
-	users.NewAuthHandler(authRouter, cfg, userService)
-
-	// Category Repository
 	categoryRepo := category.NewCategoryRepository(DB)
 	categoryRepo.Migration()
-	categoryService := category.NewCategoryService(categoryRepo)
-	category.NewCategoryHandler(categoryRouter, cfg, categoryService)
-
-	// Product Repository
 	productRepo := product.NewProductRepository(DB)
 	productRepo.Migration()
-	productService := product.NewProductService(productRepo)
-	product.NewProductHandler(productRouter, cfg, productService)
-
-	// Cart Repository
 	cartRepo := cart.NewCartRepository(DB)
 	cartRepo.Migration()
 	cartItemRepo := cartItem.NewCartCartItemRepository(DB)
 	cartItemRepo.Migration()
-	cartService := cart.NewCartService(cartRepo, productRepo, cartItemRepo)
-	cart.NewCartHandler(cartRouter, cfg, cartService)
-
-	// OrderItem Repository
 	orderItemRepo := orderItem.NewOrderItemRepository(DB)
 	categoryRepo.Migration()
-
-	// Order Repository
 	orderRepo := order.NewOrderRepository(DB)
 	orderRepo.Migration()
+
+	// Services
+	categoryService := category.NewCategoryService(categoryRepo)
+	productService := product.NewProductService(productRepo)
+	cartService := cart.NewCartService(cartRepo, productRepo, cartItemRepo)
+	userService := users.NewUserService(userRepo, cartService)
 	orderService := order.NewOrderService(orderRepo, orderItemRepo, cartService, productService)
+
+	// Handlers
+	users.NewAuthHandler(authRouter, cfg, userService)
+	category.NewCategoryHandler(categoryRouter, cfg, categoryService)
+	product.NewProductHandler(productRouter, cfg, productService)
+	cart.NewCartHandler(cartRouter, cfg, cartService)
 	order.NewOrderHandler(orderRouter, cfg, orderService)
+
 
 	go func() {
 		if err := srv.ListenAndServe(); err != http.ErrServerClosed {

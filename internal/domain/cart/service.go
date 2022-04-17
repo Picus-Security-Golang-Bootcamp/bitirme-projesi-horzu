@@ -16,13 +16,13 @@ type CartService struct {
 
 type Service interface {
 	Get(ctx context.Context, id string) ([]*cartItem.CartItem, error)
-	Create(ctx context.Context, customerId string) (*Cart, error)
+	Create(ctx context.Context, customerId string) error
 	AddItem(ctx context.Context, sku string, cartId string, orderQuantity int64) (string, error)
 	UpdateItem(ctx context.Context, id string, cartId string, updateQuantity uint) error
 	GetCartItems(ctx context.Context, cartId string) ([]*cartItem.CartItem, error)
 	DeleteItem(ctx context.Context, basketId, itemId string) error
-	FetchCartByUserId(ctx context.Context,UserID string) (Cart, error)
-	ClearBasket(ctx context.Context,cart *Cart) 
+	FetchCartByUserId(ctx context.Context, UserID string) (Cart, error)
+	ClearBasket(ctx context.Context, cart *Cart)
 }
 
 func NewCartService(r Repository, productRepository product.Repository, cartItemRepository cartItem.Repository) *CartService {
@@ -43,17 +43,17 @@ func (service *CartService) Get(ctx context.Context, id string) ([]*cartItem.Car
 }
 
 // Create creates a new cart
-func (service *CartService) Create(ctx context.Context, customerId string) (*Cart, error) {
+func (service *CartService) Create(ctx context.Context, customerId string) error {
 	cart := &Cart{
 		UserID: customerId,
 		Items:  nil,
 	}
-	newCart, err := service.cartRepo.Create(ctx, cart)
+	err := service.cartRepo.Create(ctx, cart)
 
 	if err != nil {
-		return nil, errors.New("Service:Failed to create cart")
+		return errors.New("Service:Failed to create cart")
 	}
-	return newCart, nil
+	return nil
 }
 
 // AddItem adds the product with given amount to given user's cart
@@ -123,7 +123,7 @@ func (service *CartService) GetCartItems(ctx context.Context, cartId string) ([]
 }
 
 //FetchCartByUserId it returns cart model for complete
-func (service *CartService) FetchCartByUserId(ctx context.Context ,UserID string) (Cart, error) {
+func (service *CartService) FetchCartByUserId(ctx context.Context, UserID string) (Cart, error) {
 	cart, err := service.cartRepo.FindByUserId(ctx, UserID)
 
 	if err != nil {
@@ -134,8 +134,8 @@ func (service *CartService) FetchCartByUserId(ctx context.Context ,UserID string
 
 }
 
-func (service *CartService) ClearBasket(ctx context.Context,cart *Cart) {
+func (service *CartService) ClearBasket(ctx context.Context, cart *Cart) {
 	for _, item := range *cart.Items {
-		service.cartItemRepo.DeleteById(ctx,item.Id)
+		service.cartItemRepo.DeleteById(ctx, item.Id)
 	}
 }

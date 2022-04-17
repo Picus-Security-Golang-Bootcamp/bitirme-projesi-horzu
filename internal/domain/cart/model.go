@@ -9,16 +9,15 @@ import (
 )
 
 type Cart struct {
-	Id         string
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
-	DeletedAt  gorm.DeletedAt `gorm:"index"`
-	UserID     string
-	TotalPrice float64
-	Status     string
+	Id            string
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	DeletedAt     gorm.DeletedAt `gorm:"index"`
+	UserID        string
+	TotalPrice    float64
+	TotalProducts float64
 
-	Items *[]cartItem.CartItem `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-
+	Items *[]cartItem.CartItem
 }
 
 func NewCart(userId string) *Cart {

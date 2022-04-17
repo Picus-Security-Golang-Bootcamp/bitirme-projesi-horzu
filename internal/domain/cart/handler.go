@@ -1,15 +1,14 @@
 package cart
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-openapi/strfmt"
-	"github.com/horzu/golang/cart-api/internal/api"
-	httpErr "github.com/horzu/golang/cart-api/internal/httpErrors"
 	"github.com/horzu/golang/cart-api/pkg/config"
 	jwtHelper "github.com/horzu/golang/cart-api/pkg/jwt"
+	mw "github.com/horzu/golang/cart-api/pkg/middleware"
 )
 
 type cartHandler struct {
@@ -20,6 +19,7 @@ type cartHandler struct {
 func NewCartHandler(r *gin.RouterGroup, cfg *config.Config, service Service) {
 	h := &cartHandler{service: service, cfg: cfg}
 
+	r.Use(mw.AdminAuthMiddleware(cfg.JWTConfig.SecretKey))
 	r.GET("/", h.listCartItems)
 	r.POST("/:id", h.createCart)
 	
@@ -30,9 +30,10 @@ func NewCartHandler(r *gin.RouterGroup, cfg *config.Config, service Service) {
 }
 
 func (c *cartHandler) listCartItems(g *gin.Context) {
-	id := getUserIdFromAuthToken(g.GetHeader("Authorization"), c.cfg.JWTConfig.SecretKey)
+	userId := g.GetString("userID")
+	// id := getUserIdFromAuthToken(g.GetHeader("Authorization"), c.cfg.JWTConfig.SecretKey)
 
-	result, err := c.service.Get(g.Request.Context(), id)
+	result, err := c.service.Get(g.Request.Context(), userId)
 	if err != nil {
 		g.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -45,30 +46,37 @@ func (c *cartHandler) listCartItems(g *gin.Context) {
 func (c *cartHandler) createCart(g *gin.Context) {
 	id := g.Param("id")
 
-	if b, err := c.service.Create(g.Request.Context(), id); err != nil {
+	if err := c.service.Create(g.Request.Context(), id); err != nil {
 		g.JSON(http.StatusBadRequest, err.Error())
 	} else {
 
-		g.JSON(http.StatusCreated, map[string]string{"id": b.Id})
+		g.JSON(http.StatusCreated, "Cart Created")
 	}
 }
 
 func (c *cartHandler) addTocart(g *gin.Context) {
-	// "userid'yi auth'dan çek sonra da aktif cartı db'den çek"
-	var req *api.CartItem
-	if err := g.Bind(&req); err != nil {
-		g.JSON(httpErr.ErrorResponse(httpErr.CannotBindGivenData))
+	userId := g.GetString("userID")
+
+	itemId := g.Query("itemId")
+	quantity := g.Query("quantity")
+	fmt.Println(userId)
+
+	quantitya, err := strconv.Atoi(quantity)
+
+	if err!=nil{
+		g.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	if err := req.Validate(strfmt.NewFormats()); err != nil {
-		g.JSON(httpErr.ErrorResponse(err))
-	}
+	cart, err := c.service.FetchCartByUserId(g, userId)
 
-	if itemId, err := c.service.AddItem(g.Request.Context(), *&req.Product.Sku, req.CartID, *&req.Quantity); err != nil {
+	if itemId, err := c.service.AddItem(g.Request.Context(), itemId, cart.Id, int64(quantitya)); err != nil {
 		g.JSON(http.StatusBadRequest, err.Error())
+		return
 	} else {
 		g.JSON(http.StatusCreated, map[string]string{"id": itemId})
+		return
+
 	}
 }
 
