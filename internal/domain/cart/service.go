@@ -99,18 +99,30 @@ func (service *CartService) UpdateItem(ctx context.Context, cartId string, itemI
 	return err
 }
 
-func (service *CartService) DeleteItem(ctx context.Context, basketId, itemId string) error {
+func (service *CartService) DeleteItem(ctx context.Context, cartId, itemId string) error {
+	deletedItem, err := service.cartItemRepo.FindByID(ctx, cartId, itemId)
 
-	basket := service.cartRepo.Get(ctx, basketId)
-	if basket == nil {
-		return errors.New("Service: Get basket error. Basket Id:%s")
+	if err != nil {
+		return ErrItemNotExistInCart
 	}
-	if basket == nil {
-		return errors.New("Service: Basket not found")
+
+	err = service.cartItemRepo.DeleteById(ctx, deletedItem.Id)
+		
+	if err!=nil{
+		return errors.New("Service: Failed to update cart in data storage.")
+
 	}
-	if err := service.cartItemRepo.DeleteById(ctx, itemId); err != nil {
-		return errors.New("Service: Failed to update basket in data storage.")
-	}
+
+	// cart := service.cartRepo.Get(ctx, cartId)
+	// if cart == nil {
+	// 	return errors.New("Service: Get cart error. cart Id:%s")
+	// }
+	// if cart == nil {
+	// 	return errors.New("Service: cart not found")
+	// }
+	// if err := service.cartItemRepo.DeleteById(ctx, itemId); err != nil {
+	// 	return errors.New("Service: Failed to update cart in data storage.")
+	// }
 	return nil
 }
 

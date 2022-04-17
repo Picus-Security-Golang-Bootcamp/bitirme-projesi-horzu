@@ -6,7 +6,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/horzu/golang/cart-api/pkg/config"
-	jwtHelper "github.com/horzu/golang/cart-api/pkg/jwt"
 	mw "github.com/horzu/golang/cart-api/pkg/middleware"
 )
 
@@ -21,9 +20,9 @@ func NewCartHandler(r *gin.RouterGroup, cfg *config.Config, service Service) {
 	r.Use(mw.UserAuthMiddleware(cfg.JWTConfig.SecretKey))
 	r.GET("/", h.listCartItems)
 	// r.POST("/:id", h.createCart)
-	
+
 	r.POST("/item", h.addTocart)
-	r.PUT("/:id/item/:itemId/quantity/:quantity", h.updateItem)
+	r.PUT("/item/:itemId/quantity/:quantity", h.updateItem)
 	r.DELETE("/item/:itemId", h.deleteItem)
 
 }
@@ -59,7 +58,7 @@ func (c *cartHandler) addTocart(g *gin.Context) {
 
 	quantity, err := strconv.Atoi(g.Query("quantity"))
 
-	if err!=nil{
+	if err != nil {
 		g.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
@@ -77,14 +76,17 @@ func (c *cartHandler) addTocart(g *gin.Context) {
 }
 
 func (c *cartHandler) updateItem(g *gin.Context) {
-	cartId := g.Param("id")
+	userId := g.GetString("userID")
+
 	itemId := g.Param("itemId")
 	quantity, err := strconv.Atoi(g.Param("quantity"))
 
-	if len(cartId) == 0 || len(itemId) == 0 || err != nil || quantity <= 0 {
-		g.JSON(http.StatusBadRequest, "Failed to update item. BasketId or BasketItem Id is null or empty.")
+	cart, err := c.service.GetCartByUserId(g, userId)
+
+	if len(cart.Id) == 0 || len(itemId) == 0 || err != nil || quantity <= 0 {
+		g.JSON(http.StatusBadRequest, "Failed to update item. CartId or CartItem Id is null or empty.")
 	}
-	if err := c.service.UpdateItem(g.Request.Context(), cartId, itemId, uint(quantity)); err != nil {
+	if err := c.service.UpdateItem(g.Request.Context(), cart.Id, itemId, uint(quantity)); err != nil {
 		g.JSON(http.StatusBadRequest, err.Error())
 	}
 	g.JSON(http.StatusAccepted, "item updated")
@@ -92,19 +94,20 @@ func (c *cartHandler) updateItem(g *gin.Context) {
 }
 
 func (c *cartHandler) deleteItem(g *gin.Context) {
-	id := "userid'yi auth'dan çek"
+	userId := g.GetString("userID")
+
 	itemId := g.Param("itemId")
 
-	if err := c.service.DeleteItem(g.Request.Context(), id, itemId); err != nil {
-		g.JSON(http.StatusBadRequest, err.Error())
+	cart, err := c.service.GetCartByUserId(g, userId)
+
+	if err != nil {
+		g.JSON(http.StatusBadRequest, err)
+		return
 	}
-	g.JSON(http.StatusAccepted, "")
-}
 
-
-func getUserIdFromAuthToken(token, secretKey string) string {
-	decodedClaims := jwtHelper.VerifyToken(token, secretKey)
-	userId := decodedClaims.UserId
-
-	return userId
+	if err := c.service.DeleteItem(g.Request.Context(), cart.Id, itemId); err != nil {
+		g.JSON(http.StatusBadRequest, err.Error())
+		return
+	}
+	g.JSON(http.StatusAccepted, "Item deleted")
 }

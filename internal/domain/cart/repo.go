@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// Repository encapsulates the logic to access basket from the data source.
+// Repository encapsulates the logic to access cart from the data source.
 type Repository interface {
 	Get(ctx context.Context, id string) *Cart
 	Create(ctx context.Context, b *Cart) error
