@@ -63,7 +63,7 @@ func (or *OrderRepository) GetAllByUser(ctx context.Context, id string) ([]*Orde
 	zap.L().Debug("Order.repo.getAll")
 
 	var orders []*Order
-	if err := or.db.Preload("Items").Preload("Items.Product").Where("id = ?", id).Find(&orders).Error; err != nil {
+	if err := or.db.Where("is_canceled = ?", false).Preload("Items").Where("user_id = ?", id).Find(&orders).Error; err != nil {
 		zap.L().Error("order.repo.getAll failed to get all orders", zap.Error(err))
 		return nil, err
 	}

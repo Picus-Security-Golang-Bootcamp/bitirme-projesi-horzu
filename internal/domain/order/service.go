@@ -20,6 +20,7 @@ type orderService struct {
 
 type Service interface {
 	CompleteOrderWithUserId(ctx context.Context, userId string) error
+	GetAll(ctx context.Context, userId string) ([]*Order,error)
 }
 
 func NewOrderService(orderRepo Repository, orderItemRepo *orderItem.OrderItemRepository, cartService cart.Service, productService product.Service, cartRepository *cart.CartRepository) Service {
@@ -58,3 +59,13 @@ func (service *orderService) CompleteOrderWithUserId(ctx context.Context, userId
 	return nil
 }
 
+//GetAll list all orders of user
+func (service *orderService) GetAll(ctx context.Context, userId string) ([]*Order,error) {
+	orders, err := service.repo.GetAllByUser(ctx, userId)
+	
+	if err!=nil{
+		return nil, errors.New("No order found")
+	}
+
+	return orders, nil
+}
