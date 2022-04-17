@@ -27,12 +27,12 @@ func NewUserService(repo Repository, cartService cart.Service) Service {
 }
 
 func (u *userService) Create(ctx context.Context, user *User) error {
-	user, err := u.repo.Create(user)
+	newUser, err := u.repo.Create(user)
 	if err != nil {
 		return err
 	}
 
-	u.cartService.Create(ctx, user.Id)
+	u.cartService.Create(ctx, newUser.Id)
 
 	return nil
 }

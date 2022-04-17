@@ -54,7 +54,7 @@ func (service *orderService) CompleteOrderWithUserId(ctx context.Context, userId
 	}
 
 	//create order
-	order := NewOrder(cart)
+	order := NewOrder(*cart)
 	_, err1 := service.repo.Create(ctx, order)
 
 	if err1 != nil {
@@ -62,7 +62,7 @@ func (service *orderService) CompleteOrderWithUserId(ctx context.Context, userId
 	}
 
 	//CLEAR BASKET
-	service.cartService.ClearBasket(ctx, &cart)
+	service.cartService.ClearBasket(ctx, cart)
 
 	return nil
 }

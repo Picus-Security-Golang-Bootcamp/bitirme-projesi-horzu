@@ -16,7 +16,7 @@ type Repository interface {
 	GetAll(ctx context.Context) ([]*Cart, error)
 	GetByID(ctx context.Context, id string) (*Cart, error)
 	FindOrCreateByUserID(ctx context.Context, userId string) (*Cart, error)
-	FindByUserId(ctx context.Context, userId string) (Cart, error)
+	FindByUserId(ctx context.Context, userId string) (*Cart, error)
 }
 
 type CartRepository struct {
@@ -109,13 +109,13 @@ func (o *CartRepository) FindOrCreateByUserID(ctx context.Context, userId string
 	return cart, nil
 }
 
-func (o *CartRepository) FindByUserId(ctx context.Context, userId string) (Cart, error) {
-	var cart Cart
+func (o *CartRepository) FindByUserId(ctx context.Context, userId string) (*Cart, error) {
+	var cart *Cart
 
-	result := o.db.Preload("Items").Preload("Items.Product").Where("user_id = ?", userId).First(&cart)
+	result := o.db.Where("user_id = ?", userId).Limit(1).Find(&cart)
 
 	if result.Error != nil {
-		return Cart{}, result.Error
+		return nil, result.Error
 	}
 
 	return cart, nil

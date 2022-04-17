@@ -17,7 +17,7 @@ type Cart struct {
 	TotalPrice    float64
 	TotalProducts float64
 
-	Items *[]cartItem.CartItem
+	Items *[]cartItem.CartItem `gorm:"foreignKey:CartId"`
 }
 
 func NewCart(userId string) *Cart {

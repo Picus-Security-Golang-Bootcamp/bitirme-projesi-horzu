@@ -50,7 +50,7 @@ func (a *authHandler) Signup(c *gin.Context) {
 		return
 	}
 
-	err := a.service.Create(c,responseToUser(user))
+	err := a.service.Create(c, responseToUser(user))
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "This user is already registered."})

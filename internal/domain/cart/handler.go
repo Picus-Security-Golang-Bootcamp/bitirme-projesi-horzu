@@ -20,7 +20,7 @@ func NewCartHandler(r *gin.RouterGroup, cfg *config.Config, service Service) {
 
 	r.Use(mw.UserAuthMiddleware(cfg.JWTConfig.SecretKey))
 	r.GET("/", h.listCartItems)
-	r.POST("/:id", h.createCart)
+	// r.POST("/:id", h.createCart)
 	
 	r.POST("/item", h.addTocart)
 	r.PUT("/:id/item/:itemId/quantity/:quantity", h.updateItem)
@@ -30,9 +30,8 @@ func NewCartHandler(r *gin.RouterGroup, cfg *config.Config, service Service) {
 
 func (c *cartHandler) listCartItems(g *gin.Context) {
 	userId := g.GetString("userID")
-	// id := getUserIdFromAuthToken(g.GetHeader("Authorization"), c.cfg.JWTConfig.SecretKey)
 
-	result, err := c.service.Get(g.Request.Context(), userId)
+	result, err := c.service.Get(g, userId)
 	if err != nil {
 		g.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -42,16 +41,16 @@ func (c *cartHandler) listCartItems(g *gin.Context) {
 	g.JSON(http.StatusOK, result)
 }
 
-func (c *cartHandler) createCart(g *gin.Context) {
-	id := g.Param("id")
+// func (c *cartHandler) createCart(g *gin.Context) {
+// 	id := g.Param("id")
 
-	if err := c.service.Create(g.Request.Context(), id); err != nil {
-		g.JSON(http.StatusBadRequest, err.Error())
-	} else {
+// 	if err := c.service.Create(g.Request.Context(), id); err != nil {
+// 		g.JSON(http.StatusBadRequest, err.Error())
+// 	} else {
 
-		g.JSON(http.StatusCreated, "Cart Created")
-	}
-}
+// 		g.JSON(http.StatusCreated, "Cart Created")
+// 	}
+// }
 
 func (c *cartHandler) addTocart(g *gin.Context) {
 	userId := g.GetString("userID")

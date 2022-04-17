@@ -69,7 +69,7 @@ func (c *CartItemRepository) FindByID(ctx context.Context, cartId string, produc
 	var item *CartItem
 
 	err := c.db.Where(&CartItem{ProductId: productId, CartId: cartId}).First(&item).Error
-	fmt.Println(&item, err)
+	fmt.Println(item.ProductId, err)
 	if err != nil {
 		return nil, errors.New("cart item not found")
 	}
