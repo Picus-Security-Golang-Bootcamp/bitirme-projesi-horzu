@@ -1,7 +1,9 @@
 package users
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -44,6 +46,19 @@ func (a *authHandler) Signup(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	if strings.Contains(*user.Password, " ")  {
+		c.JSON(httpErr.ErrorResponse(httpErr.NewRestError(http.StatusBadRequest, "Password should not include empty strings", nil)))
+		fmt.Println()
+		return
+	}
+
+	if len(*user.Password) < 8 {
+		c.JSON(httpErr.ErrorResponse(httpErr.NewRestError(http.StatusBadRequest, "Password should be minimum 8 characters", nil)))
+		fmt.Println()
+		return
+	}
+
 
 	if err := user.Validate(strfmt.NewFormats()); err != nil {
 		c.JSON(httpErrors.ErrorResponse(err))
