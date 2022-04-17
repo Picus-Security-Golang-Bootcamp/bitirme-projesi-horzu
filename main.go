@@ -74,6 +74,8 @@ func main() {
 	// Repositories
 	roleRepo := role.NewRoleRepository(DB)
 	roleRepo.Migration()
+	roleRepo.InserSampleData()
+	
 	userRepo := users.NewUserRepository(DB)
 	userRepo.Migration()
 	categoryRepo := category.NewCategoryRepository(DB)

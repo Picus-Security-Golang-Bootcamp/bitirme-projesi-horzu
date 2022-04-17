@@ -3,6 +3,7 @@ package product
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -16,7 +17,7 @@ type Service interface {
 	CreateProduct(ctx context.Context, name string, desc string, count int64, price float64, cid string) error
 	DeleteProduct(ctx context.Context, sku string) error
 	UpdateProduct(ctx context.Context, product *Product) error
-	SearchProduct(ctx context.Context, text string, page, pageSize int) ([]Product,int64, error)
+	SearchProduct(ctx context.Context, text string, page, pageSize int) ([]*Product,int64, error) 
 	UpdateProductQuantityForOrder(ctx context.Context,itemList []Product, amount []int64) error 
 }
 
@@ -64,7 +65,8 @@ func (c *ProductService) UpdateProduct(ctx context.Context, product *Product) er
 }
 
 // SearchProduct finds Products that matches their sku number or names with given str field
-func (c *ProductService) SearchProduct(ctx context.Context, text string, page, pageSize int) ([]Product,int64, error)  {
+func (c *ProductService) SearchProduct(ctx context.Context, text string, page, pageSize int) ([]*Product,int64, error)  {
+	fmt.Println(text)
 	products, count, err := c.repo.SearchByNameOrSku(ctx, text, page, pageSize)
 	if err!=nil{
 		return nil, 0 ,err

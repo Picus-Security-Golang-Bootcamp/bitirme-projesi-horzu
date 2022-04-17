@@ -1,6 +1,7 @@
 package product
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -106,6 +107,7 @@ func (p *productHandler) searchProduct(c *gin.Context) {
 
 	//get search keyword from query
 	searchItem := c.Param("sku")
+	fmt.Println(searchItem)
 	products, count, err := p.service.SearchProduct(c.Request.Context(), searchItem, page, pageSize)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError,"No products found")
