@@ -3,6 +3,7 @@ package cart
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/horzu/golang/cart-api/internal/domain/cart/cartItem"
 	"github.com/horzu/golang/cart-api/internal/domain/product"
@@ -64,6 +65,9 @@ func (service *CartService) Create(ctx context.Context, customerId string) error
 
 // AddItem adds the product with given amount to given user's cart
 func (service *CartService) AddItem(ctx context.Context, sku string, cartId string, orderQuantity int64) (string, error) {
+	if orderQuantity > int64(maxAllowedForBasket) {
+		return "", errors.New(fmt.Sprintf("You can't add more this item to your basket. Maximum allowed item count is %d", maxAllowedQtyPerProduct))
+	}
 	addedProduct, err := service.productRepo.GetBySku(ctx, sku)
 	if err != nil {
 		return "", err
@@ -86,6 +90,9 @@ func (service *CartService) AddItem(ctx context.Context, sku string, cartId stri
 
 // UpdateItem updates the amount of product inside given user's cart
 func (service *CartService) UpdateItem(ctx context.Context, cartId string, itemId string, updateQuantity uint) error {
+	if updateQuantity > uint(maxAllowedForBasket) {
+		return errors.New(fmt.Sprintf("You can't add more this item to your basket. Maximum allowed item count is %d", maxAllowedQtyPerProduct))
+	}
 	updatedItem, err := service.cartItemRepo.FindByID(ctx, cartId, itemId)
 	if err != nil {
 		return ErrItemNotExistInCart

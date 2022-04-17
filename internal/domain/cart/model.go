@@ -8,6 +8,13 @@ import (
 	"gorm.io/gorm"
 )
 
+var (
+	maxAllowedForBasket             = 20
+	maxAllowedQtyPerProduct         = 9
+	minCartAmountForOrder   float64 = 50
+)
+
+
 type Cart struct {
 	Id            string
 	CreatedAt     time.Time
