@@ -34,6 +34,9 @@ type UserCreateUserRequest struct {
 	// phone
 	Phone string `json:"phone,omitempty"`
 
+	// role id
+	RoleID int64 `json:"role_id,omitempty"`
+
 	// surname
 	// Required: true
 	Surname *string `json:"surname"`

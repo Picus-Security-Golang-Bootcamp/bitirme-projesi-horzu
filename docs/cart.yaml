@@ -498,6 +498,7 @@ definitions:
       - username
       - name
       - surname
+
     properties:
       email:
         type: string
@@ -511,6 +512,8 @@ definitions:
         type: string
       phone:
         type: string
+      role_id:
+        type: integer
     type: object
 
   user.CreateUserResponse:

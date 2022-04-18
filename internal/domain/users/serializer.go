@@ -12,5 +12,6 @@ func responseToUser(a *api.UserCreateUserRequest) *User {
 		Email: *a.Email,
 		Password: *a.Password,
 		Phone: *&a.Phone,
+		RoleId: a.RoleID,
 	}
 }

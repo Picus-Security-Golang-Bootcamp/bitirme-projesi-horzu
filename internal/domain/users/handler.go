@@ -72,18 +72,30 @@ func (a *authHandler) Signup(c *gin.Context) {
 		return
 	}
 
+	signeduser := a.service.GetUserId(newUser.Email)
+
+	if err != nil {
+		c.JSON(httpErrors.ErrorResponse(err))
+		return
+	}
+	if user == nil {
+		c.JSON(httpErr.ErrorResponse(err))
+	}
+
+	fmt.Println(signeduser)
+
 	jwtClaimsForToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userID": newUser.Id,
-		"role":   newUser.Role.Role,
-		"email":  newUser.Email,
+		"userID": signeduser.Id,
+		"role":   signeduser.Role.Role,
+		"email":  signeduser.Email,
 		"iat":    time.Now().Unix(),
 		"exp":    time.Now().Add(time.Duration(a.cfg.JWTConfig.SessionTime) * time.Second).Unix(),
 	})
 
 	jwtClaimsForRefreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userID": newUser.Id,
-		"role":   newUser.Role.Role,
-		"email":  newUser.Email,
+		"userID": signeduser.Id,
+		"role":   signeduser.Role.Role,
+		"email":  signeduser.Email,
 		"iat":    time.Now().Unix(),
 		"exp":    time.Now().Add(time.Duration(a.cfg.JWTConfig.SessionTime*refreshTokenTime) * time.Second).Unix(),
 	})

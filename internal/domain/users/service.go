@@ -38,12 +38,12 @@ func (u *userService) Create(ctx context.Context, user *User) (*User, error) {
 }
 
 func (u *userService) GetUserId(email string) *User {
-	_, err := u.repo.Get(email)
+	user, err := u.repo.Get(email)
 	if err != nil {
 		return nil
 	}
 
-	return nil
+	return user
 }
 
 
