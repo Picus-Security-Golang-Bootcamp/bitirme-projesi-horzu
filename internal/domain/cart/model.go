@@ -21,8 +21,6 @@ type Cart struct {
 	UpdatedAt     time.Time
 	DeletedAt     gorm.DeletedAt `gorm:"index"`
 	UserID        string
-	TotalPrice    float64
-	TotalProducts float64
 
 	Items *[]cartItem.CartItem `gorm:"foreignKey:CartId"`
 }

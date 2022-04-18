@@ -19,7 +19,6 @@ func NewCartHandler(r *gin.RouterGroup, cfg *config.Config, service Service) {
 
 	r.Use(mw.UserAuthMiddleware(cfg.JWTConfig.SecretKey))
 	r.GET("/", h.listCartItems)
-	// r.POST("/:id", h.createCart)
 
 	r.POST("/item", h.addTocart)
 	r.PUT("/item/:itemId/quantity/:quantity", h.updateItem)
@@ -39,17 +38,6 @@ func (c *cartHandler) listCartItems(g *gin.Context) {
 	}
 	g.JSON(http.StatusOK, result)
 }
-
-// func (c *cartHandler) createCart(g *gin.Context) {
-// 	id := g.Param("id")
-
-// 	if err := c.service.Create(g.Request.Context(), id); err != nil {
-// 		g.JSON(http.StatusBadRequest, err.Error())
-// 	} else {
-
-// 		g.JSON(http.StatusCreated, "Cart Created")
-// 	}
-// }
 
 func (c *cartHandler) addTocart(g *gin.Context) {
 	userId := g.GetString("userID")
