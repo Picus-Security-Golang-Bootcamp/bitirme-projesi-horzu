@@ -52,7 +52,11 @@ func (p *productHandler) create(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, &productCreated)
+	c.JSON(http.StatusOK, api.SuccessfulAPIResponse{
+		Code: http.StatusOK,
+		Message: "Product Created",
+		Data: &productCreated,
+	})
 }
 
 func (p *productHandler) update(c *gin.Context) {
@@ -70,9 +74,13 @@ func (p *productHandler) update(c *gin.Context) {
 	err := p.service.UpdateProduct(c.Request.Context(), requestToUpdateProduct(productBody))
 	if err != nil {
 		c.JSON(httpErrors.ErrorResponse(err))
+		return
 	}
 
-	c.JSON(http.StatusOK, "Product Updated")
+	c.JSON(http.StatusOK, api.SuccessfulAPIResponse{
+		Code: http.StatusOK,
+		Message: "Product Created",
+	})
 }
 
 func (p *productHandler) delete(c *gin.Context) {
@@ -92,7 +100,7 @@ func (p *productHandler) listProduct(c *gin.Context) {
 	page, pageSize := pagination.GetPaginationParametersFromRequest(c)
 	products, count, err := p.service.GetAll(c.Request.Context(), page, pageSize)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		c.JSON(httpErrors.ErrorResponse(err))
 		return
 	}
 
@@ -110,7 +118,7 @@ func (p *productHandler) searchProduct(c *gin.Context) {
 	fmt.Println(searchItem)
 	products, count, err := p.service.SearchProduct(c.Request.Context(), searchItem, page, pageSize)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError,"No products found")
+		c.JSON(httpErrors.ErrorResponse(err))
 		return
 	}
 

@@ -34,18 +34,24 @@ func NewCartService(r Repository, productRepository product.Repository, cartItem
 	}
 }
 
+// GetAllCartItems gets all cart items by the given id
 func (service *CartService) GetAllCartItems(ctx context.Context, id string) ([]cartItem.CartItem, error) {
+	fmt.Println("22")
+
 	if len(id) == 0 {
 		return nil, errors.New("Id cannot be nil or empty")
 	}
 
 	cart, err := service.GetCartByUserId(ctx, id)
+	fmt.Println("33")
 
 	if err != nil {
 		return nil, errors.New(err.Error())
 	}
 
 	cartitems, _ := service.cartItemRepo.GetItems(ctx, cart.Id)
+	fmt.Println("44")
+
 	return cartitems, nil
 }
 
@@ -75,13 +81,13 @@ func (service *CartService) AddItem(ctx context.Context, sku string, cartId stri
 
 	_, err = service.cartItemRepo.FindByID(ctx, cartId, addedProduct.Id)
 	if err == nil {
-		return "", ErrItemAlreadyInCart
+		return "", err
 	}
 	if addedProduct.Stock < orderQuantity {
-		return "", product.ErrProductInsufficientStock
+		return "", err
 	}
 	if orderQuantity < 0 {
-		return "", ErrInvalidOrder
+		return "", err
 	}
 	err = service.cartItemRepo.Create(ctx, cartItem.NewCartItem(addedProduct.Id, cartId, uint(orderQuantity)))
 
@@ -95,7 +101,7 @@ func (service *CartService) UpdateItem(ctx context.Context, cartId string, itemI
 	}
 	updatedItem, err := service.cartItemRepo.FindByID(ctx, cartId, itemId)
 	if err != nil {
-		return ErrItemNotExistInCart
+		return err
 	}
 	updatedItem.Quantity = updateQuantity
 	err = service.cartItemRepo.Update(ctx, updatedItem)
@@ -107,7 +113,7 @@ func (service *CartService) DeleteItem(ctx context.Context, cartId, itemId strin
 	deletedItem, err := service.cartItemRepo.FindByID(ctx, cartId, itemId)
 
 	if err != nil {
-		return ErrItemNotExistInCart
+		return err
 	}
 
 	err = service.cartItemRepo.DeleteById(ctx, deletedItem.Id)
@@ -138,7 +144,7 @@ func (service *CartService) GetCartItems(ctx context.Context, cartId string) ([]
 	}
 	items, err := service.cartItemRepo.GetItems(ctx, cart.Id)
 	if err == nil {
-		return nil, ErrItemNotExistInCart
+		return nil, err
 	}
 
 	return items, nil

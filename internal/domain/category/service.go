@@ -24,6 +24,7 @@ func NewCategoryService(repo *categoryRepository) Service {
 	return &categoryService{repo: repo}
 }
 
+// BulkCreate creates categories by uploaded csv files.
 func (s *categoryService) CreateBulk(ctx context.Context, fileHeader *multipart.FileHeader) (int, error) {
 	categories := make([]*Category, 0)
 	data, err := csvHelper.ReadCSV(fileHeader)
@@ -42,6 +43,7 @@ func (s *categoryService) CreateBulk(ctx context.Context, fileHeader *multipart.
 	return count, nil
 }
 
+// ListAll returns all active categories
 func (s *categoryService) ListAll(ctx context.Context, page int, pageSize int) ([]Category,int64, error) {
 	categories, count, err := s.repo.ListAll(ctx, page, pageSize)
 	if err != nil {

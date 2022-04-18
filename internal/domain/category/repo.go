@@ -26,6 +26,7 @@ func (p *categoryRepository) Migration() {
 	p.db.AutoMigrate(&Category{})
 }
 
+// ListAll returns all active categories
 func (p *categoryRepository) ListAll(ctx context.Context, page int, pageSize int) ([]Category, int64, error) {
 	zap.L().Debug("category.repo.getAll")
 
@@ -44,6 +45,7 @@ func (p *categoryRepository) ListAll(ctx context.Context, page int, pageSize int
 	return categories, count, nil
 }
 
+// BulkCreate creates categories by uploaded csv files.
 func (p *categoryRepository) BulkCreate(ctx context.Context, categories []*Category) (int, error) {
 	zap.L().Debug("category.repo.BulkCreate", zap.Reflect("categories", categories))
 

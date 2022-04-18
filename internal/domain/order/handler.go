@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/horzu/golang/cart-api/internal/api"
 	"github.com/horzu/golang/cart-api/internal/domain/cart"
+	"github.com/horzu/golang/cart-api/internal/httpErrors"
 	"github.com/horzu/golang/cart-api/pkg/config"
 	mw "github.com/horzu/golang/cart-api/pkg/middleware"
 )
@@ -34,18 +35,13 @@ func (order *orderHandler) completeOrderWithUserId(g *gin.Context) {
 	err := order.service.CompleteOrderWithUserId(g, userId)
 
 	if err != nil {
-		log.Println(err.Error())
-		g.JSON(http.StatusBadRequest, api.ErrorAPIResponse{
-			Code:    http.StatusBadRequest,
-			Message: err.Error(),
-		})
-		g.Abort()
+		g.JSON(httpErrors.ErrorResponse(err))
 		return
 	}
 
 	g.JSON(http.StatusCreated, api.SuccessfulAPIResponse{
 		Code:    http.StatusOK,
-		Message: "ok",
+		Message: "Order Created",
 	})
 }
 
@@ -56,17 +52,13 @@ func (order *orderHandler) listAll(g *gin.Context) {
 
 	if err != nil {
 		log.Println(err.Error())
-		g.JSON(http.StatusBadRequest, api.ErrorAPIResponse{
-			Code:    http.StatusBadRequest,
-			Message: err.Error(),
-		})
-		g.Abort()
+		g.JSON(httpErrors.ErrorResponse(err))
 		return
 	}
 
 	g.JSON(http.StatusCreated, api.SuccessfulAPIResponse{
 		Code:    http.StatusOK,
-		Message: "ok",
+		Message: "All orders listed",
 		Data: orders,
 	})
 }
@@ -80,11 +72,7 @@ func (order *orderHandler) cancelOrder(g *gin.Context) {
 
 	if err != nil {
 		log.Println(err.Error())
-		g.JSON(http.StatusBadRequest, api.ErrorAPIResponse{
-			Code:    http.StatusBadRequest,
-			Message: err.Error(),
-		})
-		g.Abort()
+		g.JSON(httpErrors.ErrorResponse(err))
 		return
 	}
 

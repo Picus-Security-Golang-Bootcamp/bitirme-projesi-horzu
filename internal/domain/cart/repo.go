@@ -98,6 +98,7 @@ func (o *CartRepository) GetByID(ctx context.Context, id string) (*Cart, error) 
 	return cart, nil
 }
 
+// FindByUserId finds cart by the given user id
 func (o *CartRepository) FindByUserId(ctx context.Context, userId string) (*Cart, error) {
 	var cart *Cart
 

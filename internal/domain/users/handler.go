@@ -100,7 +100,7 @@ func (a *authHandler) Signup(c *gin.Context) {
 func (a *authHandler) login(c *gin.Context) {
 	var req api.Login
 	if err := c.Bind(&req); err != nil {
-		c.JSON(httpErr.ErrorResponse(httpErr.NewRestError(http.StatusBadRequest, "Check your request body", nil)))
+		c.JSON(httpErrors.ErrorResponse(err))
 		return
 	}
 
@@ -115,7 +115,7 @@ func (a *authHandler) login(c *gin.Context) {
 		return
 	}
 	if user == nil {
-		c.JSON(httpErr.ErrorResponse(httpErr.NewRestError(http.StatusBadRequest, "user not found", nil)))
+		c.JSON(httpErr.ErrorResponse(err))
 	}
 
 	jwtClaimsForToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{

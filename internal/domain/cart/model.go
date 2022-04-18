@@ -11,7 +11,7 @@ import (
 var (
 	MaxAllowedForBasket             = 20
 	MaxAllowedQtyPerProduct         = 9
-	MinCartAmountForOrder   float64 = 50
+	MinCartAmountForOrder   float64 = 10
 )
 
 

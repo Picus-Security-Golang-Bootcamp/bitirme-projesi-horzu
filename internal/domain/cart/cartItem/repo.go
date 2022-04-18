@@ -54,6 +54,7 @@ func (c *CartItemRepository) Update(ctx context.Context, cartItem *CartItem) err
 	return nil
 }
 
+// DeleteById deletes cart item by given id
 func (c *CartItemRepository) DeleteById(ctx context.Context, id string) error {
 	result := c.db.Where("id = ?", id).Delete(&CartItem{})
 

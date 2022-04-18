@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/horzu/golang/cart-api/internal/api"
 	"github.com/horzu/golang/cart-api/internal/httpErrors"
 	"github.com/horzu/golang/cart-api/pkg/config"
 	mw "github.com/horzu/golang/cart-api/pkg/middleware"
@@ -27,9 +28,7 @@ func NewCategoryHandler(r *gin.RouterGroup, cfg *config.Config, service Service)
 func (p *categoryHandler) createBulk(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"status": "Error reading file",
-		})
+		c.JSON(http.StatusUnprocessableEntity,httpErrors.ParseErrors(err))
 		return
 	}
 	
@@ -45,8 +44,9 @@ func (p *categoryHandler) createBulk(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "records created!",
+	c.JSON(http.StatusOK, api.SuccessfulAPIResponse{
+		Code: http.StatusCreated,
+		Message: "Categories Created!",
 	})
 }
 

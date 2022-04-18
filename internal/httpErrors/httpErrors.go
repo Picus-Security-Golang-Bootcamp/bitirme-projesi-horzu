@@ -13,13 +13,19 @@ import (
 )
 
 var (
-	InternalServerError = errors.New("Internal Server Error")
-	NotFound            = errors.New("Not Found")
-	RequestTimeoutError = errors.New("Request Timeout")
-	CannotBindGivenData = errors.New("Could not bind given data")
-	ValidationError     = errors.New("Validation failed for given payload")
-	UniqueError         = errors.New("Item should be unique on database")
-	LoginError          = errors.New("Wrong username or password")
+	InternalServerError   = errors.New("Internal Server Error")
+	NotFound              = errors.New("Not Found")
+	RequestTimeoutError   = errors.New("Request Timeout")
+	CannotBindGivenData   = errors.New("Could not bind given data")
+	ValidationError       = errors.New("Validation failed for given payload")
+	UniqueError           = errors.New("Item should be unique on database")
+	LoginError            = errors.New("Wrong username or password")
+	ErrItemAlreadyInCart  = errors.New("Item is already in cart")
+	ErrInvalidOrder       = errors.New("Quantity should be positive integer")
+	ErrInvalidUpdateQty   = errors.New("Update quantity should be positive integer")
+	ErrItemNotExistInCart = errors.New("Item does not exist in the cart")
+	ErrProductNotFound         = errors.New("Product not found")
+	ErrProductInsufficientStock = errors.New("Product stock is not enough")
 )
 
 type RestError api.SuccessfulAPIResponse
